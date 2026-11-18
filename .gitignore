@@ -1,0 +1,18 @@
+# Virtual environment (hundreds of packages, never commit)
+venv/
+
+# Secrets and local settings
+.env
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# macOS system file
+.DS_Store
+
+# VS Code personal settings
+.vscode/
+
+# Generated report exports (we recreate these anytime)
+exports/
