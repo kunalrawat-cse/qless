@@ -32,7 +32,7 @@ class Config:
 
     # ---------- Pickup slot rules (edit these safely) ----------
     SLOT_LENGTH_MINUTES = 15            # Each pickup slot is 15 minutes
-    DEFAULT_SLOT_CAPACITY = 20          # Max orders per slot (manager can change later)
+    DEFAULT_SLOT_CAPACITY = 12         # Max orders per slot (manager can change later)
     CANTEEN_OPEN_HOUR = 9               # First slot starts at 09:00
     CANTEEN_CLOSE_HOUR = 17             # Last slot ends at 17:00
 
