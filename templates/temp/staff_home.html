@@ -1,12 +1,16 @@
-{% extends "base.html" %}
+{% extends "app_base.html" %}
 
 {% block title %}Staff dashboard - Qless{% endblock %}
 
 {% block content %}
-  <h1>Canteen area</h1>
-  <p>Welcome, {{ current_user.full_name }}. Staff and managers can see this page.</p>
-  <p><strong>{{ orders_today }}</strong> orders are booked for today.</p>
-  <p><small>The real Action Now dashboard comes in Phase 6.</small></p>
+  <h1 style="font-size: 2rem;">Canteen area</h1>
+  <p class="text-soft">Welcome, {{ current_user.full_name }}. Staff and managers can see this page.</p>
 
+  <div class="card" style="max-width: 360px;">
+    <span class="text-small text-soft">Orders booked for today</span>
+    <p class="num" style="margin: 0; font-family: var(--font-heading); font-size: 2.5rem; font-weight: 700; color: var(--color-forest);">{{ orders_today }}</p>
+  </div>
+
+  <p class="text-small text-soft" style="margin-top: 16px;">The real Action Now dashboard comes in Phase 6.</p>
   <p><a href="{{ url_for('main.manager_settings') }}">Try the manager-only page (staff should get "Access denied")</a></p>
 {% endblock %}

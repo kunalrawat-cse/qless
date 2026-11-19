@@ -1,25 +1,17 @@
 """
-main.py - Temporary role pages for Phase 3.
+main.py - Temporary role pages.
 
 They exist only to prove that login and role protection work.
 Phase 5 (student) and Phase 6 (staff) replace them with the real screens.
+(The public Home page at "/" now lives in routes/public.py.)
 """
 
-from flask import Blueprint, g, redirect, render_template
+from flask import Blueprint, render_template
 
 from db import fetch_all, fetch_one
-from routes.access import home_url_for_role, login_required, role_required
+from routes.access import login_required, role_required
 
 main_bp = Blueprint("main", __name__)
-
-
-@main_bp.route("/")
-def index():
-    # Logged-in users go to their own home, everyone else goes to login.
-    # Phase 4 replaces this with the public Home page.
-    if g.user:
-        return redirect(home_url_for_role(g.user["role"]))
-    return redirect("/login")
 
 
 @main_bp.route("/account")

@@ -1,0 +1,1701 @@
+/*
+  main.css - Styles shared by every Qless page.
+
+  Sections (use Ctrl+F on the number to jump):
+   1. Base and typography      8. Forms
+   2. Layout helpers           9. Flash messages
+   3. Accessibility           10. Public navbar
+   4. Buttons                 11. Footer
+   5. Cards                   12. Logo
+   6. Badges and chips        13. Hero and device mock-ups
+   7. Icons                   14. Home page sections
+                              15. Inner pages (How it works, Sustainability, About)
+                              16. Login and signup card
+                              17. Error page and temporary app bar
+                              18. Loading skeletons
+                              19. Responsive rules
+                              20. Reduced motion
+
+  Colours, sizes and spacing come from variables.css. Edit them there.
+*/
+
+
+/* =========================================================
+   1. Base and typography
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 var(--space-3);
+  color: var(--color-forest);
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: var(--text-hero);
+  font-weight: 700;
+}
+
+h2 {
+  font-size: var(--text-h2);
+  font-weight: 700;
+}
+
+h3 {
+  font-size: var(--text-h3);
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 var(--space-4);
+}
+
+a {
+  color: var(--color-forest);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--color-leaf);
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+small,
+.text-small {
+  font-size: var(--text-small);
+}
+
+.text-soft {
+  color: var(--color-text-soft);
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Prices, OTPs, timers and KPIs line up neatly with this class */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  margin-bottom: var(--space-2);
+  color: var(--color-leaf);
+  font-size: var(--text-small);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lead {
+  max-width: 640px;
+  color: var(--color-text-soft);
+  font-size: 1.125rem;
+}
+
+
+/* =========================================================
+   2. Layout helpers
+   ========================================================= */
+
+.container {
+  width: 100%;
+  max-width: var(--width-site);
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.section {
+  padding: var(--space-8) 0;
+}
+
+.section--mint {
+  background: var(--color-mint);
+}
+
+.section-heading {
+  max-width: 680px;
+  margin: 0 auto var(--space-7);
+  text-align: center;
+}
+
+.section-heading .lead {
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.grid--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.stack > * + * {
+  margin-top: var(--space-4);
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.button-row--center {
+  justify-content: center;
+}
+
+
+/* =========================================================
+   3. Accessibility
+   ========================================================= */
+
+/* Keyboard users see a clear green ring on whatever is focused */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* "Skip to content" link: hidden until a keyboard user tabs to it */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: var(--space-4);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+}
+
+.skip-link:focus {
+  top: var(--space-2);
+  color: var(--color-text-on-dark);
+}
+
+/* Text for screen readers only */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* =========================================================
+   4. Buttons
+   Hierarchy: primary -> secondary -> outline -> ghost
+   ========================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;                 /* Comfortable touch target */
+  padding: 10px var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--speed-fast), transform var(--speed-fast), box-shadow var(--speed-fast);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn--primary {
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+}
+
+.btn--primary:hover {
+  background: var(--color-forest-hover);
+  color: var(--color-text-on-dark);
+}
+
+.btn--secondary {
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+.btn--secondary:hover {
+  background: var(--color-border-sage);
+  color: var(--color-forest);
+}
+
+.btn--outline {
+  border-color: var(--color-border-strong);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.btn--outline:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--color-forest);
+}
+
+.btn--ghost:hover {
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+.btn--large {
+  min-height: 52px;
+  padding: 14px var(--space-6);
+  font-size: 1.0625rem;
+}
+
+.btn--full {
+  width: 100%;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   5. Cards
+   ========================================================= */
+
+.card {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-rest);
+}
+
+/* Cards that lift slightly on desktop hover */
+.card--lift {
+  transition: transform var(--speed-fast), box-shadow var(--speed-fast);
+}
+
+.card--lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-raised);
+}
+
+.card--mint {
+  border-color: var(--color-border-sage);
+  background: var(--color-mint);
+}
+
+.card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+.card__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+
+/* =========================================================
+   6. Badges and chips
+   ========================================================= */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.badge--success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.badge--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.badge--error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.badge--urgent {
+  background: var(--color-tangerine);
+  color: var(--color-text-on-dark);
+}
+
+/* Used for Phase 2 and Future / AI items so nobody mistakes them for live features */
+.badge--future {
+  background: var(--color-mint);
+  color: var(--color-forest);
+  border: 1px dashed var(--color-leaf);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+
+.chip--active {
+  border-color: var(--color-forest);
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+}
+
+/* The small square dot on food cards: green = veg, red = non-veg, amber = egg */
+.food-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-success-text);
+  border-radius: 3px;
+  position: relative;
+}
+
+.food-dot::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--color-success-text);
+}
+
+.food-dot--non-veg {
+  border-color: var(--color-error-text);
+}
+
+.food-dot--non-veg::after {
+  background: var(--color-error-text);
+}
+
+.food-dot--egg {
+  border-color: var(--color-honey);
+}
+
+.food-dot--egg::after {
+  background: var(--color-honey);
+}
+
+
+/* =========================================================
+   7. Icons (Lucide)
+   Write <i data-lucide="leaf"></i> in HTML. main.js swaps it for an SVG.
+   ========================================================= */
+
+[data-lucide],
+.lucide {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  stroke-width: 1.75;
+}
+
+
+/* =========================================================
+   8. Forms
+   ========================================================= */
+
+.form-field {
+  margin-bottom: var(--space-4);
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);       /* 16px stops iPhones zooming in on focus */
+  transition: border-color var(--speed-fast), box-shadow var(--speed-fast);
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: var(--color-leaf);
+  box-shadow: 0 0 0 3px var(--color-border-sage);
+  outline: none;
+}
+
+.form-hint {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+}
+
+/* Big spaced-out box for typing the 6-digit reset code */
+.input-code {
+  font-size: 1.5rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   9. Flash messages (the coloured notices at the top of a page)
+   ========================================================= */
+
+.flash-area {
+  max-width: var(--width-site);
+  margin: var(--space-4) auto 0;
+  padding: 0 var(--space-5);
+}
+
+.flash {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+
+.flash__text {
+  flex: 1;
+}
+
+.flash--success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.flash--error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.flash--info {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.flash__close {
+  min-width: 28px;
+  min-height: 28px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   10. Public navbar
+   ========================================================= */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(250, 253, 251, 0.94);
+  backdrop-filter: blur(8px);
+}
+
+.navbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 68px;
+}
+
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navbar__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-control);
+  color: var(--color-text);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.navbar__link:hover {
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+/* The page you are on is shown in leaf green */
+.navbar__link[aria-current="page"] {
+  color: var(--color-leaf);
+  font-weight: 600;
+}
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The hamburger button only appears on small screens */
+.navbar__toggle {
+  display: none;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-forest);
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   11. Footer
+   ========================================================= */
+
+.footer {
+  margin-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--space-6);
+  padding: var(--space-7) 0 var(--space-6);
+}
+
+.footer__title {
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+
+.footer__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer__links li {
+  margin-bottom: var(--space-2);
+}
+
+.footer__links a {
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+  text-decoration: none;
+}
+
+.footer__links a:hover {
+  color: var(--color-forest);
+  text-decoration: underline;
+}
+
+.footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) 0 var(--space-5);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+}
+
+
+/* =========================================================
+   12. Logo (leaf-wrapped Q + wordmark)
+   The colours below are what make the inverted (dark-background) version work.
+   ========================================================= */
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-forest);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.logo:hover {
+  color: var(--color-forest);
+}
+
+.logo__mark {
+  width: 36px;
+  height: 36px;
+}
+
+.logo__ring {
+  fill: none;
+  stroke: var(--color-forest);
+  stroke-width: 6;
+}
+
+.logo__leaf {
+  fill: var(--color-leaf);
+}
+
+.logo__tip {
+  fill: var(--color-tangerine);
+}
+
+/* Dark-background version: white ring and wordmark, orange tip */
+.logo--inverted,
+.logo--inverted:hover {
+  color: var(--color-text-on-dark);
+}
+
+.logo--inverted .logo__ring {
+  stroke: var(--color-text-on-dark);
+}
+
+/* Stacked version used above the login form */
+.logo--stacked {
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.logo--stacked .logo__mark {
+  width: 56px;
+  height: 56px;
+}
+
+
+/* =========================================================
+   13. Hero and device mock-ups
+   The browser and phone are built with plain HTML and CSS,
+   so there are no screenshots to keep up to date.
+   ========================================================= */
+
+.hero {
+  padding: var(--space-8) 0 var(--space-7);
+  background: linear-gradient(180deg, var(--color-mint) 0%, var(--color-background) 100%);
+  text-align: center;
+}
+
+.hero h1 {
+  max-width: 800px;
+  margin: 0 auto var(--space-4);
+}
+
+.hero .lead {
+  margin: 0 auto var(--space-5);
+}
+
+.hero__tagline-accent {
+  color: var(--color-leaf);
+}
+
+.showcase {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-5);
+  margin-top: var(--space-7);
+  text-align: left;
+}
+
+/* ----- Browser frame (canteen dashboard) ----- */
+
+.browser {
+  width: 100%;
+  max-width: 760px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+  overflow: hidden;
+}
+
+.browser__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+.browser__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+}
+
+.browser__address {
+  margin-left: var(--space-3);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-soft);
+  font-size: var(--text-caption);
+}
+
+.browser__body {
+  padding: var(--space-4);
+}
+
+.mini-title {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.mini-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.mini-kpi {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.mini-kpi__label {
+  display: block;
+  color: var(--color-text-soft);
+  font-size: 0.6875rem;
+}
+
+.mini-kpi__value {
+  color: var(--color-forest);
+  font-family: var(--font-heading);
+  font-size: 1.375rem;
+  font-weight: 700;
+}
+
+.mini-kpi--urgent {
+  border-left: 3px solid var(--color-tangerine);
+}
+
+.mini-queue {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: var(--space-3);
+}
+
+.mini-slot {
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font-size: var(--text-caption);
+}
+
+.mini-slot__time {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-1);
+  font-weight: 600;
+}
+
+.mini-slot__items {
+  color: var(--color-text-soft);
+}
+
+.mini-batch {
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--color-mint);
+  font-size: var(--text-caption);
+}
+
+.mini-batch li {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.mini-batch ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ----- Phone frame (student menu) ----- */
+
+.phone {
+  flex-shrink: 0;
+  width: 230px;
+  padding: 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 32px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.phone__screen {
+  padding: var(--space-3);
+  border-radius: 24px;
+  background: var(--color-background);
+}
+
+.mini-chips {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.mini-chips .chip {
+  min-height: 26px;
+  padding: 2px 10px;
+  font-size: 0.6875rem;
+}
+
+.mini-food {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.mini-food__photo {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--color-border-sage), var(--color-mint));
+}
+
+.mini-food__text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.mini-food__meta {
+  display: block;
+  color: var(--color-text-soft);
+  font-size: 0.6875rem;
+  font-weight: 400;
+}
+
+.mini-add {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+/* Numbered pins that point at the three callouts below the hero */
+.pin {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-tangerine);
+  color: var(--color-text-on-dark);
+  font-size: var(--text-small);
+  font-weight: 700;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.25);
+}
+
+
+/* Pins are placed inside the frame they point at */
+.browser__body,
+.phone__screen {
+  position: relative;
+}
+
+.pin--top-right {
+  top: 10px;
+  right: 10px;
+}
+
+.pin--mid-right {
+  top: 44%;
+  right: 6px;
+}
+
+.pin--bottom-right {
+  right: 10px;
+  bottom: 10px;
+}
+
+/* Pin 2 sits on the corner of the kitchen queue column */
+.pin--queue {
+  top: -12px;
+  right: -12px;
+}
+
+.mini-queue > div:first-child {
+  position: relative;
+}
+
+/* Small "Log waste" button in the corner of the dashboard mock-up */
+.mini-add--corner {
+  position: absolute;
+  top: 14px;
+  right: 50px;
+}
+
+
+/* =========================================================
+   14. Home page sections
+   ========================================================= */
+
+/* ----- Annotated UI showcase: three callout cards ----- */
+
+.callout__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: var(--space-3);
+  border-radius: 50%;
+  background: var(--color-tangerine);
+  color: var(--color-text-on-dark);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+
+.callout__demo {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+}
+
+.demo-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.demo-slot {
+  padding: 6px var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.demo-slot--active {
+  border-color: var(--color-forest);
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+}
+
+.demo-slot--busy {
+  border-color: var(--color-tangerine);
+  color: var(--color-warning-text);
+}
+
+.demo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-small);
+}
+
+.demo-row:last-child {
+  border-bottom: 0;
+}
+
+/* ----- "How Qless works" 3-step strip ----- */
+
+.step-card {
+  position: relative;
+  text-align: center;
+}
+
+.step-card .card__icon {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.step-card__arrow {
+  position: absolute;
+  top: 50%;
+  right: -22px;
+  color: var(--color-leaf);
+}
+
+.step-card:last-child .step-card__arrow {
+  display: none;
+}
+
+/* ----- Student vs canteen value grid ----- */
+
+.value-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.value-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.value-list [data-lucide],
+.value-list .lucide {
+  margin-top: 2px;
+  color: var(--color-leaf);
+}
+
+/* ----- Sustainability strip ----- */
+
+.metric-tile {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-sage);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.metric-tile h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.metric-tile h3 .lucide,
+.metric-tile h3 [data-lucide] {
+  color: var(--color-leaf);
+}
+
+/* ----- Analytics preview bento ----- */
+
+.bento {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: var(--space-5);
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  height: 120px;
+  margin-top: var(--space-4);
+}
+
+.bar-chart__bar {
+  flex: 1;
+  min-height: 8px;
+  border-radius: 6px 6px 0 0;
+  background: var(--color-border-sage);
+}
+
+.bar-chart__bar--peak {
+  background: var(--color-tangerine);
+}
+
+.bar-chart__bar--leaf {
+  background: var(--color-leaf);
+}
+
+.bar-labels {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  color: var(--color-text-soft);
+  font-size: var(--text-caption);
+  text-align: center;
+}
+
+.bar-labels span {
+  flex: 1;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  font-size: var(--text-small);
+}
+
+.rank-row__track {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+}
+
+.rank-row__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-leaf);
+}
+
+/* ----- Final call-to-action card ----- */
+
+.cta-card {
+  padding: var(--space-7) var(--space-5);
+  border: 1px solid var(--color-border-sage);
+  border-radius: var(--radius-card);
+  background: var(--color-mint);
+  text-align: center;
+}
+
+.cta-card .lead {
+  margin: 0 auto var(--space-5);
+}
+
+
+/* =========================================================
+   15. Inner pages (How it works, Sustainability, About, Contact)
+   ========================================================= */
+
+.page-header {
+  padding: var(--space-8) 0 var(--space-6);
+  background: linear-gradient(180deg, var(--color-mint) 0%, var(--color-background) 100%);
+  text-align: center;
+}
+
+.page-header h1 {
+  font-size: var(--text-hero);
+}
+
+.page-header .lead {
+  margin: 0 auto;
+}
+
+/* Vertical numbered timeline on the How It Works page */
+.timeline {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 23px;
+  width: 2px;
+  background: var(--color-border-sage);
+}
+
+.timeline__item {
+  position: relative;
+  display: flex;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.timeline__number {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.timeline__body {
+  flex: 1;
+}
+
+.timeline__who {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+}
+
+/* Measured metrics vs platform goals on the Sustainability page */
+.fact-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fact-list li {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.fact-list li:last-child {
+  border-bottom: 0;
+}
+
+.fact-list strong {
+  display: block;
+}
+
+.sdg-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-sage);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.sdg-note__badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-control);
+  background: var(--color-honey);
+  color: var(--color-text-on-dark);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.prose {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+
+/* =========================================================
+   16. Login and signup card
+   ========================================================= */
+
+.auth-page {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-7) var(--space-5);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: var(--width-narrow);
+}
+
+.auth-card__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--space-5);
+  text-align: center;
+}
+
+.auth-card__tagline {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+}
+
+.auth-card h1 {
+  font-size: var(--text-h2);
+}
+
+/* Student / Canteen staff switch above the login form */
+.role-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+  padding: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+}
+
+.role-switch a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  border-radius: 10px;
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.role-switch a[aria-current="true"] {
+  background: var(--color-surface);
+  color: var(--color-forest);
+  box-shadow: var(--shadow-rest);
+}
+
+.auth-links {
+  margin: var(--space-5) 0 0;
+  text-align: center;
+  font-size: var(--text-small);
+}
+
+.demo-box {
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+}
+
+
+/* =========================================================
+   17. Error page and temporary app bar
+   ========================================================= */
+
+.error-page {
+  max-width: 520px;
+  margin: var(--space-8) auto;
+  text-align: center;
+}
+
+.error-page__code {
+  margin-bottom: var(--space-2);
+  color: var(--color-leaf);
+  font-family: var(--font-heading);
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* The simple bar shown on logged-in pages until Phase 5 and 6 replace it */
+.app-bar {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.app-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 64px;
+}
+
+.app-bar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--text-small);
+}
+
+.app-main {
+  max-width: var(--width-site);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-small);
+}
+
+.data-table th {
+  padding: var(--space-3);
+  background: var(--color-surface-muted);
+  text-align: left;
+}
+
+.data-table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+
+/* =========================================================
+   18. Loading skeletons
+   Grey boxes with a soft moving shine, shown while data loads.
+   Used from Phase 5 onwards.
+   ========================================================= */
+
+.skeleton {
+  border-radius: var(--radius-control);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-muted) 25%,
+    #E9EBEE 50%,
+    var(--color-surface-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.skeleton--text {
+  height: 14px;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton--card {
+  height: 96px;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+
+/* =========================================================
+   19. Responsive rules
+   Mobile < 640px | Tablet 640px to 1023px | Desktop 1024px and up
+   ========================================================= */
+
+@media (max-width: 1023px) {
+  .grid--3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bento {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .bento > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .step-card__arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Navbar collapses into a hamburger menu */
+  .navbar__toggle {
+    display: inline-flex;
+  }
+
+  .navbar__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5) var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-background);
+  }
+
+  .navbar__menu.is-open {
+    display: flex;
+  }
+
+  .navbar__links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .navbar__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* The phone mock-up sits under the browser instead of beside it */
+  .showcase {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mini-queue {
+    grid-template-columns: 1fr;
+  }
+
+  .mini-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pin {
+    display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  h1,
+  .page-header h1 {
+    font-size: var(--text-hero-mobile);
+  }
+
+  h2 {
+    font-size: var(--text-h2-mobile);
+  }
+
+  .container,
+  .flash-area {
+    padding: 0 var(--space-4);
+  }
+
+  .section {
+    padding: var(--space-7) 0;
+  }
+
+  .grid--2,
+  .grid--3,
+  .bento {
+    grid-template-columns: 1fr;
+  }
+
+  .footer__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  .button-row .btn {
+    width: 100%;
+  }
+
+  .sdg-note {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .timeline__item {
+    gap: var(--space-4);
+  }
+}
+
+
+/* =========================================================
+   20. Reduced motion
+   People who turn off animations in their device settings get none.
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

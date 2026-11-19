@@ -1,0 +1,49 @@
+{% extends "public_base.html" %}
+
+{% block title %}Contact - Qless{% endblock %}
+
+{% block content %}
+
+  <section class="page-header">
+    <div class="container">
+      <p class="eyebrow">Contact</p>
+      <h1>Get in touch</h1>
+      <p class="lead">Questions about an order, an account or the project? Here is who to ask.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid--3">
+
+        <article class="card">
+          <span class="card__icon"><i data-lucide="store"></i></span>
+          <h3>About an order</h3>
+          <p class="text-soft" style="margin: 0;">
+            Speak to the staff at the canteen counter. Have your 4-digit OTP or QR code ready.
+          </p>
+        </article>
+
+        <article class="card">
+          <span class="card__icon"><i data-lucide="key-round"></i></span>
+          <h3>Account or password</h3>
+          <p class="text-soft" style="margin: 0;">
+            Use <a href="{{ url_for('auth.forgot_password') }}">Forgot password</a> to reset it with a 6-digit code.
+            Staff accounts are created by the canteen manager.
+          </p>
+        </article>
+
+        <article class="card">
+          <span class="card__icon"><i data-lucide="mail"></i></span>
+          <h3>About the project</h3>
+          {# EDIT: replace this address with your own contact email #}
+          <p class="text-soft" style="margin: 0;">
+            Email <a href="mailto:contact@qless.edu">contact@qless.edu</a>.
+          </p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+{% endblock %}

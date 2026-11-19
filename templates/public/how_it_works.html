@@ -1,0 +1,90 @@
+{% extends "public_base.html" %}
+
+{% block title %}How It Works - Qless{% endblock %}
+
+{% block content %}
+
+  <section class="page-header">
+    <div class="container">
+      <p class="eyebrow">How it works</p>
+      <h1>From a phone tap to a collected meal</h1>
+      <p class="lead">Five steps connect what students want with what the kitchen cooks.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-label="The five steps">
+    <div class="container">
+      <ol class="timeline">
+
+        <li class="timeline__item">
+          <span class="timeline__number num">1</span>
+          <div class="timeline__body card">
+            <span class="badge badge--success timeline__who">Student</span>
+            <h2 style="font-size: 1.5rem;">Pre-order</h2>
+            <p class="text-soft" style="margin: 0;">
+              Open the menu, search or pick a category, and add dishes to your cart.
+              Each dish shows its Veg, Non-Veg or Egg label, allergens, prep time and how many are left.
+            </p>
+          </div>
+        </li>
+
+        <li class="timeline__item">
+          <span class="timeline__number num">2</span>
+          <div class="timeline__body card">
+            <span class="badge badge--success timeline__who">Student</span>
+            <h2 style="font-size: 1.5rem;">Choose a pickup slot</h2>
+            <p class="text-soft" style="margin: 0;">
+              Pick the next available 15-minute slot, or choose a later one today.
+              Slots that are almost full are flagged, and full slots cannot be booked.
+            </p>
+          </div>
+        </li>
+
+        <li class="timeline__item">
+          <span class="timeline__number num">3</span>
+          <div class="timeline__body card">
+            <span class="badge badge--warning timeline__who">Kitchen</span>
+            <h2 style="font-size: 1.5rem;">Kitchen preps</h2>
+            <p class="text-soft" style="margin: 0;">
+              Staff see orders grouped by pickup slot, plus the total of each dish needed in the next 15 minutes.
+              One tap starts prep and one tap marks an order ready. Students see the status change live.
+            </p>
+          </div>
+        </li>
+
+        <li class="timeline__item">
+          <span class="timeline__number num">4</span>
+          <div class="timeline__body card">
+            <span class="badge badge--success timeline__who">Student and counter</span>
+            <h2 style="font-size: 1.5rem;">QR / OTP pickup</h2>
+            <p class="text-soft" style="margin: 0;">
+              Show your QR code or read out your 4-digit OTP at the counter.
+              Staff verify it and hand over the meal. The code is saved on your phone, so it still works if the signal drops.
+            </p>
+          </div>
+        </li>
+
+        <li class="timeline__item">
+          <span class="timeline__number num">5</span>
+          <div class="timeline__body card">
+            <span class="badge badge--warning timeline__who">Kitchen and manager</span>
+            <h2 style="font-size: 1.5rem;">Waste tracking</h2>
+            <p class="text-soft" style="margin: 0;">
+              At the end of a shift, staff log any wasted portions and the reason.
+              Managers compare prepared against sold and watch the waste trend, so the next day's batch is better.
+            </p>
+          </div>
+        </li>
+
+      </ol>
+
+      <div class="text-center" style="margin-top: 16px;">
+        <div class="button-row button-row--center">
+          <a class="btn btn--primary btn--large" href="{{ url_for('auth.signup') }}">Get Started</a>
+          <a class="btn btn--outline btn--large" href="{{ url_for('public.sustainability') }}">Why it matters</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}

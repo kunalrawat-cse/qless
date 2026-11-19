@@ -1,31 +1,72 @@
-{% extends "base.html" %}
+{% extends "public_base.html" %}
+{% from "partials/logo.html" import logo %}
 
 {% block title %}Log in - Qless{% endblock %}
 
 {% block content %}
-  <h1>Log in</h1>
-  <p>Less Waiting. Less Waste. Better Campus.</p>
+  <div class="auth-page">
+    <div class="auth-card">
 
-  <form method="post">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="auth-card__brand">
+        {{ logo(style="stacked") }}
+        <p class="auth-card__tagline">Less Waiting. Less Waste. Better Campus.</p>
+      </div>
 
-    <label for="email">Campus email</label>
-    <input id="email" name="email" type="email" value="{{ email }}" required autofocus>
+      <div class="card">
+        <!-- Switch between the student and staff wording. Both use the same login. -->
+        <div class="role-switch" role="group" aria-label="Choose login type">
+          <a href="{{ url_for('auth.login', next=request.args.get('next'), **{'as': 'student'}) }}"
+             {% if audience == 'student' %}aria-current="true"{% endif %}>
+            <i data-lucide="graduation-cap"></i> Student
+          </a>
+          <a href="{{ url_for('auth.login', next=request.args.get('next'), **{'as': 'staff'}) }}"
+             {% if audience == 'staff' %}aria-current="true"{% endif %}>
+            <i data-lucide="chef-hat"></i> Canteen staff
+          </a>
+        </div>
 
-    <label for="password">Password</label>
-    <input id="password" name="password" type="password" required>
+        {% if audience == 'staff' %}
+          <h1>Canteen staff login</h1>
+          <p class="text-soft">Kitchen, counter and manager accounts. Staff accounts are created by the canteen manager.</p>
+        {% else %}
+          <h1>Student login</h1>
+          <p class="text-soft">Log in with your campus email to order your next meal.</p>
+        {% endif %}
 
-    <button type="submit">Log in</button>
-  </form>
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-  <p>
-    <a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a> |
-    <a href="{{ url_for('auth.signup') }}">Create a student account</a>
-  </p>
+          <div class="form-field">
+            <label for="email">Campus email</label>
+            <input id="email" name="email" type="email" value="{{ email }}"
+                   autocomplete="email" required autofocus>
+          </div>
 
-  <!-- TEMPORARY: demo accounts, remove before the final release -->
-  <p><small>
-    Demo logins (password <strong>Qless@123</strong>):
-    aarav@campus.edu (student), staff@qless.edu (staff), manager@qless.edu (manager)
-  </small></p>
+          <div class="form-field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password"
+                   autocomplete="current-password" required>
+          </div>
+
+          <button class="btn btn--primary btn--full" type="submit">Log in</button>
+        </form>
+
+        <p class="auth-links">
+          <a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+          {% if audience == 'student' %}
+            &middot; <a href="{{ url_for('auth.signup') }}">Create a student account</a>
+          {% endif %}
+        </p>
+      </div>
+
+      {# TEMPORARY: demo accounts. Delete this box in Phase 8 before the final release. #}
+      <div class="demo-box">
+        <strong>Demo logins</strong> (password <span class="num">Qless@123</span>):<br>
+        aarav@campus.edu (student)<br>
+        staff@qless.edu (staff)<br>
+        manager@qless.edu (manager)
+      </div>
+
+    </div>
+  </div>
 {% endblock %}

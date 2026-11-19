@@ -15,6 +15,7 @@ from db import fetch_one
 from routes.access import role_required
 from routes.auth import auth_bp
 from routes.main import main_bp
+from routes.public import public_bp
 from routes.security import check_csrf_token, csrf_token
 
 # Create the Flask app and load all settings from config.py
@@ -23,6 +24,7 @@ app.config.from_object(Config)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(main_bp)
+app.register_blueprint(public_bp)
 
 
 @app.before_request

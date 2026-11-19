@@ -1,0 +1,83 @@
+/*
+  variables.css - The Fresh Harvest Tech design tokens.
+
+  Every colour, font size, spacing step and shadow used by Qless is
+  defined ONCE here. To re-theme the whole site, change a value below
+  and every page updates. main.css never uses a raw colour code.
+*/
+
+:root {
+  /* ---------- Brand colours ---------- */
+  --color-forest: #064E3B;            /* Primary buttons and headings */
+  --color-forest-hover: #04392B;      /* Primary button on hover */
+  --color-leaf: #16A34A;              /* Brand green, active nav, focus rings */
+  --color-mint: #ECFDF5;              /* Soft section bands, secondary buttons */
+  --color-honey: #D97706;             /* Secondary warm highlight */
+  --color-tangerine: #F97316;         /* Urgent alerts, low-stock, slot warnings */
+
+  /* ---------- Status colours (text colour + background colour) ---------- */
+  --color-success-text: #15803D;
+  --color-success-bg: #DCFCE7;
+  --color-warning-text: #B45309;
+  --color-warning-bg: #FEF3C7;
+  --color-error-text: #DC2626;
+  --color-error-bg: #FEE2E2;
+
+  /* ---------- Surfaces and borders ---------- */
+  --color-background: #FAFDFB;        /* Alabaster page background */
+  --color-surface: #FFFFFF;           /* Cards and modals */
+  --color-surface-muted: #F3F4F6;     /* Table headers and skeletons */
+  --color-border: #E5E7EB;            /* Neutral 1px borders */
+  --color-border-sage: #D1FAE5;       /* Soft green borders */
+  --color-border-strong: #D1D5DB;     /* Outline buttons and inputs */
+
+  /* ---------- Text ---------- */
+  --color-text: #111827;              /* Main copy */
+  --color-text-soft: #4B5563;         /* Helper text, timestamps */
+  --color-text-on-dark: #FFFFFF;
+
+  /* ---------- Fonts ---------- */
+  --font-heading: "Outfit", "Segoe UI", Arial, sans-serif;
+  --font-body: "Inter", "Segoe UI", Arial, sans-serif;
+
+  /* ---------- Type scale (16px base) ---------- */
+  --text-hero: 3rem;                  /* 48px - becomes 40px on phones */
+  --text-hero-mobile: 2.5rem;
+  --text-h2: 2rem;                    /* 32px - becomes 28px on phones */
+  --text-h2-mobile: 1.75rem;
+  --text-h3: 1.25rem;                 /* 20px */
+  --text-body: 1rem;                  /* 16px */
+  --text-small: 0.875rem;             /* 14px */
+  --text-caption: 0.75rem;            /* 12px */
+
+  /* ---------- Spacing scale (4px / 8px steps) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* ---------- Shape ---------- */
+  --radius-control: 12px;             /* Buttons and inputs */
+  --radius-card: 16px;                /* Cards */
+  --radius-pill: 9999px;              /* Badges and chips */
+
+  /* ---------- Shadows ---------- */
+  --shadow-rest: 0 1px 3px rgba(6, 78, 59, 0.06);
+  --shadow-raised: 0 8px 20px rgba(6, 78, 59, 0.08);
+
+  /* ---------- Layout widths ---------- */
+  --width-site: 1200px;               /* Public site and student app */
+  --width-dashboard: 1440px;          /* Canteen dashboard */
+  --width-narrow: 440px;              /* Login and signup cards */
+
+  /* ---------- Motion (fast and subtle) ---------- */
+  --speed-fast: 150ms;
+  --speed-normal: 250ms;
+
+  /* ---------- Focus ring (accessibility) ---------- */
+  --focus-ring: 2px solid var(--color-leaf);
+}

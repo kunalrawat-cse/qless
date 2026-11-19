@@ -1,0 +1,27 @@
+{#
+  logo.html - The Qless logo as a reusable piece.
+
+  How to use it in any template:
+    {% from "partials/logo.html" import logo %}
+    {{ logo() }}                          horizontal logo (navbar)
+    {{ logo(style="stacked") }}           mark above the word (login page)
+    {{ logo(inverted=True) }}             for dark green backgrounds
+
+  The colours live in main.css (section 12), not here.
+#}
+{% macro logo(style="horizontal", inverted=False, link=True) %}
+  {% set classes = "logo" ~ (" logo--stacked" if style == "stacked" else "") ~ (" logo--inverted" if inverted else "") %}
+  {% set mark %}
+    <svg class="logo__mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <circle class="logo__ring" cx="24" cy="24" r="14"/>
+      <path class="logo__leaf" d="M27 27 C33 27 42 33 41 43 C31 44 25 37 27 27 Z"/>
+      <circle class="logo__tip" cx="41" cy="43" r="3"/>
+    </svg>
+    <span>Qless</span>
+  {% endset %}
+  {% if link %}
+    <a class="{{ classes }}" href="{{ url_for('public.home') }}" aria-label="Qless home">{{ mark }}</a>
+  {% else %}
+    <span class="{{ classes }}">{{ mark }}</span>
+  {% endif %}
+{% endmacro %}

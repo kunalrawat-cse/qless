@@ -1,0 +1,13 @@
+{# Shows the coloured notices created with flash() in Python. Included by every layout. #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-area" role="status" aria-live="polite">
+      {% for category, message in messages %}
+        <div class="flash flash--{{ category }}">
+          <span class="flash__text">{{ message }}</span>
+          <button class="flash__close" type="button" aria-label="Dismiss message">&times;</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

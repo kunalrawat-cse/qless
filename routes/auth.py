@@ -51,6 +51,13 @@ def get_safe_next_url():
     return next_url if is_local_path else None
 
 
+def get_login_audience():
+    # The login page has a "Student / Canteen staff" switch.
+    # It only changes the wording on the page. Everyone is checked the same way,
+    # and the account's real role decides where they land.
+    return "staff" if request.args.get("as") == "staff" else "student"
+
+
 def validate_signup_form(full_name, email, campus_id, dietary_preference, password, confirm_password):
     # Collect every problem so the student can fix them all at once
     errors = []
@@ -141,7 +148,7 @@ def login():
         return redirect(home_url_for_role(g.user["role"]))
 
     if request.method == "GET":
-        return render_template("auth/login.html", email="")
+        return render_template("auth/login.html", email="", audience=get_login_audience())
 
     email = request.form.get("email", "").strip().lower()
     password = request.form.get("password", "")
@@ -155,7 +162,7 @@ def login():
     # so nobody can use the form to discover which emails are registered
     if user is None or not check_password_hash(user["password_hash"], password):
         flash("Incorrect email or password.", "error")
-        return render_template("auth/login.html", email=email)
+        return render_template("auth/login.html", email=email, audience=get_login_audience())
 
     # Start a fresh session on login (blocks "session fixation" attacks)
     session.clear()

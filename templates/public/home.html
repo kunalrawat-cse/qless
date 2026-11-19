@@ -1,0 +1,358 @@
+{% extends "public_base.html" %}
+
+{% block title %}Qless - Less Waiting. Less Waste. Better Campus.{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Hero: headline, two buttons, and the product showcase ===== -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="container">
+      <p class="eyebrow">Smart campus canteen platform</p>
+      <h1 id="hero-heading">Less Waiting. Less Waste. <span class="hero__tagline-accent">Better Campus.</span></h1>
+      <p class="lead">
+        The smart campus canteen platform connecting student pre-orders with
+        real-time kitchen demand&mdash;built for faster lunches and smarter kitchens.
+      </p>
+
+      <div class="button-row button-row--center">
+        <a class="btn btn--primary btn--large" href="{{ url_for('public.open_app') }}">
+          <i data-lucide="smartphone"></i> Launch Student App
+        </a>
+        <a class="btn btn--ghost btn--large" href="#how-qless-works">
+          See How It Works <i data-lucide="arrow-down"></i>
+        </a>
+      </div>
+
+      <!-- Browser frame = canteen dashboard. Phone frame = student menu. -->
+      <div class="showcase" role="img"
+           aria-label="Preview of the Qless canteen dashboard on a laptop and the student menu on a phone">
+
+        <div class="browser" aria-hidden="true">
+          <div class="browser__bar">
+            <span class="browser__dot"></span>
+            <span class="browser__dot"></span>
+            <span class="browser__dot"></span>
+            <span class="browser__address">qless / canteen / dashboard</span>
+          </div>
+
+          <div class="browser__body">
+            <span class="pin pin--top-right">3</span>
+            <span class="mini-add mini-add--corner">Log waste</span>
+            <p class="mini-title">Action Now</p>
+
+            <div class="mini-kpis">
+              <div class="mini-kpi">
+                <span class="mini-kpi__label">Orders right now</span>
+                <span class="mini-kpi__value num">18</span>
+              </div>
+              <div class="mini-kpi">
+                <span class="mini-kpi__label">Next 15 minutes</span>
+                <span class="mini-kpi__value num">11</span>
+              </div>
+              <div class="mini-kpi">
+                <span class="mini-kpi__label">Slot load</span>
+                <span class="mini-kpi__value num">75%</span>
+              </div>
+              <div class="mini-kpi mini-kpi--urgent">
+                <span class="mini-kpi__label">Low-stock alerts</span>
+                <span class="mini-kpi__value num">2</span>
+              </div>
+            </div>
+
+            <div class="mini-queue">
+              <div>
+                <span class="pin pin--queue">2</span>
+                <div class="mini-slot">
+                  <div class="mini-slot__time"><span class="num">12:30 - 12:45</span><span class="badge badge--warning">Preparing</span></div>
+                  <div class="mini-slot__items">2 Veg Thali, 1 Masala Dosa, 1 Cold Coffee</div>
+                </div>
+                <div class="mini-slot">
+                  <div class="mini-slot__time"><span class="num">12:45 - 13:00</span><span class="badge badge--success">Confirmed</span></div>
+                  <div class="mini-slot__items">3 Chicken Biryani, 2 Veg Sandwich</div>
+                </div>
+              </div>
+
+              <div class="mini-batch">
+                <strong>Prep for next 15 min</strong>
+                <ul>
+                  <li><span>Veg Thali</span><span class="num">4</span></li>
+                  <li><span>Chicken Biryani</span><span class="num">3</span></li>
+                  <li><span>Masala Dosa</span><span class="num">2</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phone" aria-hidden="true">
+          <div class="phone__screen">
+            <span class="pin pin--bottom-right">1</span>
+            <p class="mini-title">Today's menu</p>
+
+            <div class="mini-chips">
+              <span class="chip chip--active">All</span>
+              <span class="chip">Meals</span>
+              <span class="chip">Snacks</span>
+            </div>
+
+            <div class="mini-food">
+              <span class="mini-food__photo"></span>
+              <span class="mini-food__text">
+                <span class="food-dot"></span> Veg Thali
+                <span class="mini-food__meta num">Rs. 90 &middot; ~10 min</span>
+              </span>
+              <span class="mini-add">+ Add</span>
+            </div>
+
+            <div class="mini-food">
+              <span class="mini-food__photo"></span>
+              <span class="mini-food__text">
+                <span class="food-dot food-dot--non-veg"></span> Chicken Roll
+                <span class="mini-food__meta num">Rs. 80 &middot; 3 left</span>
+              </span>
+              <span class="mini-add">+ Add</span>
+            </div>
+
+            <div style="margin-top: 12px;">
+              <div class="demo-slots">
+                <span class="demo-slot demo-slot--active num">12:45</span>
+                <span class="demo-slot num">13:00</span>
+                <span class="demo-slot demo-slot--busy num">13:15</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-soft text-small" style="margin-top: 16px;">Illustrative screens with sample data.</p>
+    </div>
+  </section>
+
+
+  <!-- ===== Section 1: Annotated UI showcase (three callouts) ===== -->
+  <section class="section" aria-labelledby="showcase-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Inside the product</p>
+        <h2 id="showcase-heading">Three screens that change the lunch rush</h2>
+        <p class="lead">The core of Qless: choose a slot, cook to demand, and log what is left.</p>
+      </div>
+
+      <div class="grid grid--3">
+        <article class="card card--lift">
+          <span class="callout__number">1</span>
+          <h3>Pickup Slot Selector</h3>
+          <p class="text-soft">Students pick a 15-minute window. Busy slots show a warning, so the rush spreads out instead of piling up at the counter.</p>
+          <div class="callout__demo" aria-hidden="true">
+            <div class="demo-slots">
+              <span class="demo-slot num">12:30</span>
+              <span class="demo-slot demo-slot--active num">12:45</span>
+              <span class="demo-slot demo-slot--busy num">13:00</span>
+              <span class="demo-slot num">13:15</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card card--lift">
+          <span class="callout__number">2</span>
+          <h3>Live Kitchen Queue</h3>
+          <p class="text-soft">Orders are grouped by pickup slot, with one tap to start prep and one tap to mark ready. The kitchen sees what to cook next.</p>
+          <div class="callout__demo" aria-hidden="true">
+            <div class="demo-row"><span class="num">12:30</span><span class="badge badge--warning">Preparing</span></div>
+            <div class="demo-row"><span class="num">12:45</span><span class="badge badge--success">Confirmed</span></div>
+            <div class="demo-row"><span class="num">13:00</span><span class="badge badge--success">Confirmed</span></div>
+          </div>
+        </article>
+
+        <article class="card card--lift">
+          <span class="callout__number">3</span>
+          <h3>Waste Logger</h3>
+          <p class="text-soft">At the end of a shift, staff log what was thrown away and why. That record is what makes the waste trend real.</p>
+          <div class="callout__demo" aria-hidden="true">
+            <div class="demo-row"><span>Veg Biryani</span><span class="num">4 portions</span></div>
+            <div class="demo-row"><span>Reason</span><span class="badge badge--warning">Overproduction</span></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== Section 2: How Qless works strip ===== -->
+  <section class="section section--mint" id="how-qless-works" aria-labelledby="strip-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">How Qless works</p>
+        <h2 id="strip-heading">From pre-order to less waste</h2>
+      </div>
+
+      <div class="grid grid--3">
+        <article class="card step-card">
+          <span class="card__icon"><i data-lucide="smartphone"></i></span>
+          <h3>Students Pre-Order</h3>
+          <p class="text-soft">Browse the menu, add dishes and choose a pickup slot. No queue for ordering.</p>
+          <i class="step-card__arrow" data-lucide="chevron-right"></i>
+        </article>
+
+        <article class="card step-card">
+          <span class="card__icon"><i data-lucide="chef-hat"></i></span>
+          <h3>Kitchens Prep Smarter</h3>
+          <p class="text-soft">The kitchen sees demand slot by slot and prepares what will actually be collected.</p>
+          <i class="step-card__arrow" data-lucide="chevron-right"></i>
+        </article>
+
+        <article class="card step-card">
+          <span class="card__icon"><i data-lucide="leaf"></i></span>
+          <h3>Campus Wastes Less</h3>
+          <p class="text-soft">Prepared-versus-sold and shift waste logs show where surplus happens, so tomorrow's batch is better.</p>
+          <i class="step-card__arrow" data-lucide="chevron-right"></i>
+        </article>
+      </div>
+
+      <p class="text-center" style="margin-top: 32px;">
+        <a class="btn btn--secondary" href="{{ url_for('public.how_it_works') }}">See the full flow <i data-lucide="arrow-right"></i></a>
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ===== Section 3: Student vs canteen value grid ===== -->
+  <section class="section" aria-labelledby="value-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Built for both sides of the counter</p>
+        <h2 id="value-heading">Better for students. Better for the canteen.</h2>
+      </div>
+
+      <div class="grid grid--2">
+        <article class="card">
+          <span class="card__icon"><i data-lucide="graduation-cap"></i></span>
+          <h3>For students</h3>
+          <ul class="value-list">
+            <li><i data-lucide="check"></i> Order ahead from your phone</li>
+            <li><i data-lucide="check"></i> Choose a 15-minute pickup slot</li>
+            <li><i data-lucide="check"></i> Follow your order: Confirmed, Preparing, Ready, Collected</li>
+            <li><i data-lucide="check"></i> Collect with a QR code or a 4-digit OTP</li>
+            <li><i data-lucide="check"></i> See Veg, Non-Veg, Egg and allergen labels before you order</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <span class="card__icon"><i data-lucide="utensils-crossed"></i></span>
+          <h3>For the canteen</h3>
+          <ul class="value-list">
+            <li><i data-lucide="check"></i> See incoming orders grouped by pickup slot</li>
+            <li><i data-lucide="check"></i> Know what to prepare in the next 15 minutes</li>
+            <li><i data-lucide="check"></i> Mark a dish sold out in one tap</li>
+            <li><i data-lucide="check"></i> Verify pickups by QR code or OTP at the counter</li>
+            <li><i data-lucide="check"></i> Log waste and compare prepared against sold</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== Section 4: Sustainability story strip ===== -->
+  <section class="section section--mint" aria-labelledby="sustain-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Sustainability</p>
+        <h2 id="sustain-heading">Measure the waste, then reduce it</h2>
+        <p class="lead">Qless tracks what the kitchen actually prepares, sells and throws away. No guesses and no made-up impact numbers.</p>
+      </div>
+
+      <div class="grid grid--3">
+        <article class="metric-tile">
+          <h3><i data-lucide="scale"></i> Prepared vs. Sold</h3>
+          <p class="text-soft" style="margin: 0;">Compare today's prepared batch with what students actually collected.</p>
+        </article>
+
+        <article class="metric-tile">
+          <h3><i data-lucide="bell-ring"></i> Surplus Alerts</h3>
+          <p class="text-soft" style="margin: 0;">Spot unsold items near closing time while there is still time to act.</p>
+        </article>
+
+        <article class="metric-tile">
+          <h3><i data-lucide="clipboard-list"></i> Shift Waste Logs</h3>
+          <p class="text-soft" style="margin: 0;">Record wasted portions and the reason, shift after shift.</p>
+        </article>
+      </div>
+
+      <p class="text-center" style="margin-top: 32px;">
+        <a class="btn btn--secondary" href="{{ url_for('public.sustainability') }}">Read about sustainability <i data-lucide="arrow-right"></i></a>
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ===== Section 5: Analytics preview bento ===== -->
+  <section class="section" aria-labelledby="analytics-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Analytics <span class="badge badge--future">Sample preview</span></p>
+        <h2 id="analytics-heading">Charts that help tomorrow's kitchen</h2>
+        <p class="lead">These cards show the style of the charts managers get. The numbers here are sample data only.</p>
+      </div>
+
+      <div class="bento">
+        <article class="card">
+          <h3>Peak Hour Load</h3>
+          <p class="text-soft text-small" style="margin: 0;">Orders by hour. Lunch is usually the rush.</p>
+          <div class="bar-chart" role="img" aria-label="Sample bar chart: orders peak between 12 and 2 pm">
+            <span class="bar-chart__bar" style="height: 20%;"></span>
+            <span class="bar-chart__bar" style="height: 30%;"></span>
+            <span class="bar-chart__bar" style="height: 35%;"></span>
+            <span class="bar-chart__bar bar-chart__bar--peak" style="height: 100%;"></span>
+            <span class="bar-chart__bar bar-chart__bar--peak" style="height: 88%;"></span>
+            <span class="bar-chart__bar" style="height: 45%;"></span>
+            <span class="bar-chart__bar" style="height: 32%;"></span>
+            <span class="bar-chart__bar" style="height: 28%;"></span>
+          </div>
+          <div class="bar-labels" aria-hidden="true">
+            <span>9</span><span>10</span><span>11</span><span>12</span><span>1</span><span>2</span><span>3</span><span>4</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Top Items</h3>
+          <p class="text-soft text-small" style="margin: 0;">Best sellers against slow movers.</p>
+          <div class="rank-row"><span style="width: 96px;">Veg Thali</span><span class="rank-row__track"><span class="rank-row__fill" style="display: block; width: 90%;"></span></span></div>
+          <div class="rank-row"><span style="width: 96px;">Masala Dosa</span><span class="rank-row__track"><span class="rank-row__fill" style="display: block; width: 72%;"></span></span></div>
+          <div class="rank-row"><span style="width: 96px;">Samosa</span><span class="rank-row__track"><span class="rank-row__fill" style="display: block; width: 55%;"></span></span></div>
+          <div class="rank-row"><span style="width: 96px;">Fruit Salad</span><span class="rank-row__track"><span class="rank-row__fill" style="display: block; width: 25%;"></span></span></div>
+        </article>
+
+        <article class="card">
+          <h3>Weekly Waste Trend</h3>
+          <p class="text-soft text-small" style="margin: 0;">Is waste per order going down?</p>
+          <div class="bar-chart" role="img" aria-label="Sample bar chart: waste falling week by week">
+            <span class="bar-chart__bar bar-chart__bar--leaf" style="height: 100%;"></span>
+            <span class="bar-chart__bar bar-chart__bar--leaf" style="height: 78%;"></span>
+            <span class="bar-chart__bar bar-chart__bar--leaf" style="height: 60%;"></span>
+            <span class="bar-chart__bar bar-chart__bar--leaf" style="height: 42%;"></span>
+          </div>
+          <div class="bar-labels" aria-hidden="true">
+            <span>Wk 1</span><span>Wk 2</span><span>Wk 3</span><span>Wk 4</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== Section 6: Final call to action ===== -->
+  <section class="section" style="padding-top: 0;" aria-labelledby="cta-heading">
+    <div class="container">
+      <div class="cta-card">
+        <h2 id="cta-heading">Ready for a shorter lunch queue?</h2>
+        <p class="lead">Log in to order your next meal, or open the canteen dashboard.</p>
+        <div class="button-row button-row--center">
+          <a class="btn btn--primary btn--large" href="{{ url_for('auth.login', **{'as': 'student'}) }}">Student Login</a>
+          <a class="btn btn--outline btn--large" href="{{ url_for('auth.login', **{'as': 'staff'}) }}">Canteen Staff Login</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}

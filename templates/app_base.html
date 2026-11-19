@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "partials/logo.html" import logo %}
+
+{#
+  app_base.html - Simple layout for logged-in pages.
+
+  TEMPORARY: Phase 5 gives students their own layout (top bar + bottom tabs)
+  and Phase 6 gives staff a sidebar layout. Until then every logged-in page
+  uses this plain top bar.
+#}
+
+{% block body %}
+  <header class="app-bar">
+    <div class="container app-bar__inner">
+      {{ logo() }}
+
+      <form class="app-bar__user" method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <a href="{{ url_for('main.account') }}">{{ current_user.full_name }}</a>
+        <span class="badge badge--success">{{ current_user.role }}</span>
+        <button class="btn btn--outline" type="submit">Log out</button>
+      </form>
+    </div>
+  </header>
+
+  {% include "partials/flash_messages.html" %}
+
+  <main id="main-content" class="app-main">
+    {% block content %}{% endblock %}
+  </main>
+{% endblock %}

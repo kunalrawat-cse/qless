@@ -1,13 +1,15 @@
-{% extends "base.html" %}
+{% extends "app_base.html" %}
 
 {% block title %}My account - Qless{% endblock %}
 
 {% block content %}
-  <h1>My account</h1>
-  <p>Any logged-in user can see this page.</p>
+  <h1 style="font-size: 2rem;">My account</h1>
+  <p class="text-soft">Any logged-in user can see this page.</p>
 
-  <p><strong>Name:</strong> {{ current_user.full_name }}</p>
-  <p><strong>Email:</strong> {{ current_user.email }}</p>
-  <p><strong>Role:</strong> {{ current_user.role }}</p>
-  <p><strong>Dietary preference:</strong> {{ current_user.dietary_preference }}</p>
+  <div class="card" style="max-width: 480px;">
+    <p><strong>Name:</strong> {{ current_user.full_name }}</p>
+    <p><strong>Email:</strong> {{ current_user.email }}</p>
+    <p><strong>Role:</strong> {{ current_user.role }}</p>
+    <p style="margin: 0;"><strong>Dietary preference:</strong> {{ current_user.dietary_preference }}</p>
+  </div>
 {% endblock %}

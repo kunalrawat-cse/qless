@@ -1,0 +1,51 @@
+{% extends "public_base.html" %}
+
+{% block title %}About - Qless{% endblock %}
+
+{% block content %}
+
+  <section class="page-header">
+    <div class="container">
+      <p class="eyebrow">About</p>
+      <h1>About Qless</h1>
+      <p class="lead">A campus canteen platform built to cut queues and food waste.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container prose">
+      <h2>Why we built it</h2>
+      <p>
+        At lunchtime a campus canteen has two problems at once. Students wait in long queues,
+        and the kitchen has to guess how much to cook. When the guess is too high, food is wasted.
+        When it is too low, dishes sell out.
+      </p>
+
+      <h2>What Qless does</h2>
+      <p>
+        Students pre-order and pick a 15-minute pickup slot. The kitchen sees demand before it arrives,
+        hands over meals with a QR code or OTP, and logs any waste at the end of the shift.
+        Managers use that record to see what was prepared, what was sold and where waste happens.
+      </p>
+
+      <h2>Who it is for</h2>
+      <p>
+        Qless has three roles: students who order, kitchen and counter staff who prepare and hand over,
+        and the canteen manager who manages the menu, pickup slots and reports.
+      </p>
+
+      <h2>About this project</h2>
+      <p>
+        Qless is a campus Design Thinking Lab project. It is a working version-one platform:
+        the focus is a realistic, fast and usable single-canteen experience.
+        Features such as demand forecasting are planned for later and are clearly marked as such.
+      </p>
+
+      <p class="button-row">
+        <a class="btn btn--primary" href="{{ url_for('public.how_it_works') }}">How It Works</a>
+        <a class="btn btn--outline" href="{{ url_for('public.contact') }}">Contact</a>
+      </p>
+    </div>
+  </section>
+
+{% endblock %}

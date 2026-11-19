@@ -1,0 +1,103 @@
+{% extends "public_base.html" %}
+
+{% block title %}Sustainability - Qless{% endblock %}
+
+{% block content %}
+
+  <section class="page-header">
+    <div class="container">
+      <p class="eyebrow">Sustainability</p>
+      <h1>Match the kitchen to the demand</h1>
+      <p class="lead">
+        Food waste on campus often starts with guessing how much to cook.
+        Qless replaces the guess with real order data.
+      </p>
+    </div>
+  </section>
+
+  <!-- Measured today vs goals: kept separate so nothing is overclaimed -->
+  <section class="section" aria-labelledby="measured-heading">
+    <div class="container">
+      <div class="section-heading">
+        <h2 id="measured-heading">What we measure, and what we aim for</h2>
+        <p class="lead">
+          Qless only reports numbers it can count from real orders and real waste logs.
+          We do not publish estimates for CO&#8322; saved or trees planted.
+        </p>
+      </div>
+
+      <div class="grid grid--2">
+        <article class="card">
+          <span class="badge badge--success">Measured in the platform</span>
+          <h3 style="margin-top: 12px;">Operational metrics</h3>
+          <ul class="fact-list">
+            <li>
+              <i data-lucide="scale"></i>
+              <span><strong>Waste today</strong><span class="text-soft text-small">Portions and kilograms logged by staff.</span></span>
+            </li>
+            <li>
+              <i data-lucide="percent"></i>
+              <span><strong>Prepared vs. sold efficiency</strong><span class="text-soft text-small">What share of the prepared batch was actually sold.</span></span>
+            </li>
+            <li>
+              <i data-lucide="bell-ring"></i>
+              <span><strong>Surplus alerts</strong><span class="text-soft text-small">Unsold items flagged near closing time.</span></span>
+            </li>
+            <li>
+              <i data-lucide="trending-down"></i>
+              <span><strong>Waste trend</strong><span class="text-soft text-small">Waste per order over time, with the reason: overproduction, spoilage or uncollected.</span></span>
+            </li>
+          </ul>
+        </article>
+
+        <article class="card card--mint">
+          <span class="badge badge--future">Goals we work toward</span>
+          <h3 style="margin-top: 12px;">What better data should lead to</h3>
+          <ul class="fact-list">
+            <li>
+              <i data-lucide="chef-hat"></i>
+              <span><strong>Smaller, better-matched batches</strong><span class="text-soft text-small">Kitchens prepare closer to what students pre-order.</span></span>
+            </li>
+            <li>
+              <i data-lucide="clock"></i>
+              <span><strong>A flatter lunch rush</strong><span class="text-soft text-small">Pickup slots spread demand, so food is not left waiting.</span></span>
+            </li>
+            <li>
+              <i data-lucide="sparkles"></i>
+              <span><strong>Demand forecasting</strong><span class="text-soft text-small">Planned for a later version. <span class="badge badge--future">Future / AI</span></span></span>
+            </li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--mint" aria-labelledby="sdg-heading">
+    <div class="container">
+      <div class="sdg-note">
+        <span class="sdg-note__badge" aria-hidden="true">12</span>
+        <div>
+          <h2 id="sdg-heading" style="font-size: 1.5rem;">UN Sustainable Development Goal 12</h2>
+          <p class="text-soft" style="margin: 0;">
+            Responsible Consumption and Production. Qless supports this goal by helping a campus canteen
+            produce what is needed and track what is wasted.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-bottom: 0;" aria-label="Get started">
+    <div class="container">
+      <div class="cta-card">
+        <h2>See it in action</h2>
+        <p class="lead">Log in with a demo account or create a student account.</p>
+        <div class="button-row button-row--center">
+          <a class="btn btn--primary btn--large" href="{{ url_for('auth.login') }}">Login</a>
+          <a class="btn btn--outline btn--large" href="{{ url_for('public.how_it_works') }}">How It Works</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
