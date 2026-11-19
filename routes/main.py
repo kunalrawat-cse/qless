@@ -2,13 +2,13 @@
 main.py - Temporary role pages.
 
 They exist only to prove that login and role protection work.
-Phase 5 (student) and Phase 6 (staff) replace them with the real screens.
+Phase 6 (staff) replaces them with the real screens. Students now use routes/student.py.
 (The public Home page at "/" now lives in routes/public.py.)
 """
 
 from flask import Blueprint, render_template
 
-from db import fetch_all, fetch_one
+from db import fetch_one
 from routes.access import login_required, role_required
 
 main_bp = Blueprint("main", __name__)
@@ -19,21 +19,6 @@ main_bp = Blueprint("main", __name__)
 def account():
     # Any logged-in user can open this page
     return render_template("temp/account.html")
-
-
-@main_bp.route("/menu")
-@role_required("student")
-def student_menu():
-    # Students only
-    menu_items = fetch_all(
-        """
-        SELECT name, category, price, food_type, stock_qty, is_sold_out
-        FROM menu_items
-        WHERE is_active = 1
-        ORDER BY category, name
-        """
-    )
-    return render_template("temp/student_home.html", menu_items=menu_items)
 
 
 @main_bp.route("/staff/dashboard")

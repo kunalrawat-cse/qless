@@ -1,0 +1,77 @@
+{% extends "student_base.html" %}
+
+{% block title %}Order #{{ order_id }} - Qless{% endblock %}
+
+{% block content %}
+  <a class="back-link" href="{{ url_for('student.orders') }}"><i data-lucide="arrow-left"></i> My orders</a>
+
+  {# order.js fills everything below. The skeletons show while the first load runs. #}
+  <div id="order-page" data-order-id="{{ order_id }}">
+
+    <div class="error-banner" id="order-banner" role="alert" hidden>
+      <i data-lucide="wifi-off"></i>
+      <span id="order-banner-text"></span>
+      <button class="btn btn--outline" id="order-retry" type="button">Try again</button>
+    </div>
+
+    <div id="order-loading">
+      <div class="skeleton skeleton--text" style="width: 40%; height: 28px;"></div>
+      <div class="skeleton skeleton--card" style="margin-bottom: 16px;"></div>
+      <div class="skeleton skeleton--card" style="height: 260px;"></div>
+    </div>
+
+    <div id="order-content" hidden>
+      <header class="order-head">
+        <h1 id="order-title" class="page-title"></h1>
+        <p id="order-subtitle" class="text-soft"></p>
+      </header>
+
+      {# 4-step tracker: Confirmed > Preparing > Ready for pickup > Collected #}
+      <section id="tracker-section" class="card tracker-card" aria-label="Order progress">
+        <ol class="tracker" id="tracker">
+          <li class="tracker__step" data-step="1"><span class="tracker__dot"><i data-lucide="check"></i></span><span class="tracker__label">Confirmed</span></li>
+          <li class="tracker__step" data-step="2"><span class="tracker__dot"><i data-lucide="chef-hat"></i></span><span class="tracker__label">Preparing</span></li>
+          <li class="tracker__step" data-step="3"><span class="tracker__dot"><i data-lucide="bell-ring"></i></span><span class="tracker__label">Ready for pickup</span></li>
+          <li class="tracker__step" data-step="4"><span class="tracker__dot"><i data-lucide="package-check"></i></span><span class="tracker__label">Collected</span></li>
+        </ol>
+        <div class="tracker__bar" aria-hidden="true"><div class="tracker__fill" id="tracker-fill"></div></div>
+      </section>
+
+      <div class="cancelled-box" id="cancelled-box" role="status" hidden>
+        <i data-lucide="circle-x"></i>
+        <span>This order was cancelled.</span>
+      </div>
+
+      <div class="order-columns">
+        {# QR + 4-digit OTP on one card #}
+        <section class="card pickup-card" id="pickup-card" aria-labelledby="pickup-title">
+          <h2 id="pickup-title" class="pickup-card__title">Pickup code</h2>
+          <p class="text-small text-soft">Show this at the counter.</p>
+          <div class="pickup-card__qr" id="qr-box" aria-label="QR code for pickup"></div>
+          <p class="pickup-card__label">or tell the staff your code</p>
+          <p class="pickup-card__otp num" id="otp-text" aria-label="Pickup code"></p>
+          <p class="text-small text-soft" id="pickup-note"></p>
+        </section>
+
+        <section class="card" aria-labelledby="summary-title">
+          <h2 id="summary-title" style="font-size: 1.25rem;">Order summary</h2>
+          <ul class="summary-list" id="summary-list"></ul>
+          <div class="summary-total">
+            <span>Total</span>
+            <span class="num" id="summary-total"></span>
+          </div>
+          <p class="text-small text-soft" id="payment-note"></p>
+
+          <button class="btn btn--outline btn--full" id="cancel-button" type="button" hidden>Cancel this order</button>
+          <p class="form-hint" id="cancel-hint" hidden></p>
+        </section>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block student_scripts %}
+  {# QR code library (small, free). If it cannot load, the 4-digit code still works. #}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="{{ url_for('static', filename='js/student/order.js') }}"></script>
+{% endblock %}

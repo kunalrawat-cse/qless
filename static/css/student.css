@@ -1,0 +1,1430 @@
+/*
+  student.css - Styles for the student app (menu, cart, order tracker).
+
+  Loaded only on student pages, after variables.css and main.css.
+  Colours, sizes and spacing come from variables.css. Edit them there.
+
+  Sections (Ctrl+F the number):
+   1. Basics for this app           8. Cart drawer
+   2. Top bar and mobile tab bar    9. Slot picker and payment
+   3. Menu toolbar (search, chips) 10. Toasts, banners, empty states
+   4. Food cards and grid          11. Order tracker page
+   5. Buttons and small parts      12. Order list
+   6. Backdrop                     13. Responsive rules
+   7. Food details modal
+*/
+
+
+/* =========================================================
+   1. Basics for this app
+   ========================================================= */
+
+/* Makes the HTML "hidden" attribute always win over our display rules */
+[hidden] {
+  display: none !important;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.student-main {
+  max-width: var(--width-site);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-5) var(--space-8);
+}
+
+.page-title {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-h2);
+}
+
+.menu-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 var(--space-3);
+  font-size: var(--text-h3);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.badge--neutral {
+  background: var(--color-surface-muted);
+  color: var(--color-text-soft);
+}
+
+/* Low-stock badge: amber text (readable) with a small tangerine dot */
+.badge--low-stock::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-tangerine);
+}
+
+
+/* =========================================================
+   2. Top bar and mobile tab bar
+   ========================================================= */
+
+.student-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.student-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  max-width: var(--width-site);
+  min-height: 64px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.student-bar__links {
+  display: flex;
+  gap: var(--space-2);
+  margin-right: auto;
+}
+
+.student-bar__link {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  color: var(--color-text-soft);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.student-bar__link:hover {
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+.student-bar__link[aria-current="page"] {
+  background: var(--color-mint);
+  color: var(--color-forest);
+  font-weight: 600;
+}
+
+.student-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.student-bar__logout {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.student-bar__name {
+  font-size: var(--text-small);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.cart-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-forest);
+  cursor: pointer;
+}
+
+.cart-button:hover {
+  background: var(--color-mint);
+}
+
+.cart-button__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* The badge grows a little when a dish is added */
+.cart-button__badge.is-bumped {
+  animation: badge-bump var(--speed-normal) ease-out;
+}
+
+@keyframes badge-bump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* Floating tab bar: phones only */
+.tab-bar {
+  position: fixed;
+  right: var(--space-3);
+  bottom: max(var(--space-2), env(safe-area-inset-bottom));
+  left: var(--space-3);
+  z-index: 40;
+  display: none;
+  justify-content: space-around;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.tab-bar__tab {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 52px;
+  border-radius: var(--radius-control);
+  color: var(--color-text-soft);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tab-bar__tab[aria-current="page"] {
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+
+/* =========================================================
+   3. Menu toolbar (search, Veg filter, category chips)
+   ========================================================= */
+
+.menu-toolbar {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.menu-toolbar__inner {
+  max-width: var(--width-site);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-5);
+}
+
+.menu-toolbar__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+}
+
+.search-box svg {
+  position: absolute;
+  top: 50%;
+  left: var(--space-3);
+  color: var(--color-text-soft);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.search-box input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px var(--space-3) 10px 40px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);       /* 16px stops iPhones zooming in */
+}
+
+.search-box input:focus {
+  border-color: var(--color-leaf);
+  box-shadow: 0 0 0 3px var(--color-border-sage);
+  outline: none;
+}
+
+.diet-filter,
+.category-chips {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Chips scroll sideways on narrow screens instead of wrapping */
+.category-chips {
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.category-chips::-webkit-scrollbar {
+  display: none;
+}
+
+button.chip {
+  gap: var(--space-2);
+  min-height: 44px;                  /* Comfortable touch target */
+  font-family: var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--speed-fast), border-color var(--speed-fast);
+}
+
+button.chip:hover:not(.chip--active) {
+  border-color: var(--color-leaf);
+  background: var(--color-mint);
+}
+
+
+/* =========================================================
+   4. Food cards and grid
+   ========================================================= */
+
+.food-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.food-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-rest);
+  transition: transform var(--speed-fast), box-shadow var(--speed-fast);
+}
+
+.food-card:active {
+  transform: scale(0.98);            /* Tap feedback */
+}
+
+/* Hover lift only on devices that have a mouse */
+@media (hover: hover) {
+  .food-card:not(.food-card--skeleton):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-raised);
+  }
+}
+
+.food-card--skeleton {
+  min-height: 112px;
+  border: 0;
+  box-shadow: none;
+}
+
+.food-card__open {
+  display: flex;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.food-card__photo {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+.food-card__photo svg {
+  width: 32px;
+  height: 32px;
+}
+
+.food-card__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.food-card__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.food-card__name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.food-card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+}
+
+.food-card__meta svg {
+  width: 14px;
+  height: 14px;
+}
+
+.food-card__buy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.food-card__price {
+  font-weight: 600;
+}
+
+.food-card__add {
+  min-width: 72px;
+  padding: 8px var(--space-4);
+}
+
+/* "+ Add" briefly becomes "Added" */
+.food-card__add.is-added {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+/* Sold out: the card fades to 60% and the button is disabled */
+.food-card.is-sold-out .food-card__open,
+.food-card.is-sold-out .food-card__price {
+  opacity: 0.6;
+}
+
+/* "Ready fast / Fresh today" strip */
+.featured-strip {
+  display: flex;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+
+.food-card--compact {
+  flex: 0 0 200px;
+  grid-template-columns: 1fr;
+  scroll-snap-align: start;
+}
+
+.food-card--compact .food-card__open {
+  flex-direction: column;
+}
+
+.food-card--compact .food-card__photo {
+  width: 100%;
+  height: 88px;
+}
+
+.food-card--compact .food-card__buy {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+/* =========================================================
+   5. Buttons and small parts
+   ========================================================= */
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-text-soft);
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.tag {
+  padding: 2px 10px;
+  border: 1px solid var(--color-border-sage);
+  border-radius: var(--radius-pill);
+  background: var(--color-mint);
+  color: var(--color-forest);
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+
+/* Mobile "View cart" bar above the tab bar */
+.cart-bar {
+  position: fixed;
+  right: var(--space-3);
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  left: var(--space-3);
+  z-index: 30;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-forest);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text-on-dark);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cart-bar__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+
+/* =========================================================
+   6. Backdrop (dark layer behind the drawer and the modal)
+   ========================================================= */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(17, 24, 39, 0.45);
+  opacity: 0;
+  transition: opacity var(--speed-normal);
+}
+
+.backdrop.is-open {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   7. Food details modal (a bottom sheet on phones)
+   ========================================================= */
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 80;
+  width: min(520px, calc(100% - 32px));
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -46%);
+  /* "visibility" waits for the fade-out so closed modals cannot be tabbed into */
+  transition: opacity var(--speed-normal), transform var(--speed-normal), visibility 0s linear var(--speed-normal);
+}
+
+.modal.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%);
+  transition: opacity var(--speed-normal), transform var(--speed-normal), visibility 0s;
+}
+
+.modal__close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 1;
+  background: var(--color-surface);
+}
+
+.modal__photo {
+  display: grid;
+  place-items: center;
+  height: 160px;
+  overflow: hidden;
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+.modal__photo svg {
+  width: 56px;
+  height: 56px;
+}
+
+.modal__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal__content {
+  padding: var(--space-5);
+}
+
+.modal__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.modal__top h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-h3);
+}
+
+.modal__price {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--color-forest);
+}
+
+.modal__subtitle {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-body);
+}
+
+.detail-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+
+.detail-list dt {
+  color: var(--color-text-soft);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.detail-list dd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  font-weight: 500;
+}
+
+.detail-list dd svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-honey);
+}
+
+
+/* =========================================================
+   8. Cart drawer (a bottom sheet on phones)
+   ========================================================= */
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, 100%);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+  visibility: hidden;
+  transform: translateX(100%);
+  transition: transform var(--speed-normal), visibility 0s linear var(--speed-normal);
+}
+
+.drawer.is-open {
+  visibility: visible;
+  transform: translateX(0);
+  transition: transform var(--speed-normal), visibility 0s;
+}
+
+.drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.drawer__header h2 {
+  margin: 0;
+  font-size: var(--text-h3);
+}
+
+.drawer__body {
+  flex: 1;
+  padding: var(--space-4) var(--space-5);
+  overflow-y: auto;
+}
+
+.drawer__footer {
+  padding: var(--space-4) var(--space-5) max(var(--space-4), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.drawer__footer:empty {
+  display: none;
+}
+
+.drawer__total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  font-size: var(--text-h3);
+  font-weight: 600;
+}
+
+.cart-lines {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.cart-line {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cart-line__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.cart-line__name {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.cart-line__price {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+}
+
+.stepper__button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-forest);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.stepper__button:hover:not(:disabled) {
+  background: var(--color-mint);
+}
+
+.stepper__button:disabled {
+  color: var(--color-border-strong);
+  cursor: not-allowed;
+}
+
+.stepper__value {
+  min-width: 24px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cart-section {
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  border: 0;
+}
+
+.cart-section h3 {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-body);
+}
+
+.cart-section legend {
+  padding: 0;
+}
+
+
+/* =========================================================
+   9. Slot picker and payment
+   ========================================================= */
+
+.segmented {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+}
+
+.segmented__button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-soft);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented__button.is-active {
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+}
+
+.slot-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-sage);
+  border-radius: var(--radius-control);
+  background: var(--color-mint);
+  color: var(--color-forest);
+}
+
+.slot-summary p {
+  margin: 0;
+}
+
+.slot-summary__time {
+  font-size: var(--text-h3);
+  font-weight: 600;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--space-2);
+}
+
+.slot-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.slot-button__time {
+  font-weight: 600;
+}
+
+.slot-button__note {
+  color: var(--color-text-soft);
+  font-size: var(--text-caption);
+}
+
+.slot-button.is-busy {
+  border-color: var(--color-tangerine);
+}
+
+.slot-button.is-busy .slot-button__note {
+  color: var(--color-warning-text);
+  font-weight: 600;
+}
+
+.slot-button.is-selected {
+  border-color: var(--color-forest);
+  background: var(--color-mint);
+  box-shadow: inset 0 0 0 1px var(--color-forest);
+}
+
+/* A full slot is greyed out and cannot be chosen */
+.slot-button:disabled {
+  border-color: var(--color-border);
+  background: var(--color-surface-muted);
+  cursor: not-allowed;
+}
+
+.slot-button:disabled .slot-button__time {
+  color: var(--color-text-soft);
+  text-decoration: line-through;
+}
+
+.payment-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: 56px;
+  margin-bottom: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.payment-option:has(input:checked) {
+  border-color: var(--color-forest);
+  background: var(--color-mint);
+}
+
+.payment-option input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--color-forest);
+}
+
+.payment-option small {
+  display: block;
+  color: var(--color-text-soft);
+}
+
+
+/* =========================================================
+   10. Toasts, banners and empty states
+   ========================================================= */
+
+.toast-area {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-5);
+  left: var(--space-4);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+.toast {
+  max-width: 420px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-leaf);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+  font-size: var(--text-small);
+  font-weight: 500;
+  animation: toast-in var(--speed-normal) ease-out;
+}
+
+.toast--error {
+  border-left-color: var(--color-error-text);
+}
+
+.toast--info {
+  border-left-color: var(--color-tangerine);
+}
+
+.toast.is-leaving {
+  opacity: 0;
+  transition: opacity var(--speed-normal);
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.error-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-error-text);
+  border-radius: var(--radius-control);
+  background: var(--color-error-bg);
+  color: var(--color-text);
+  font-size: var(--text-small);
+}
+
+.error-banner svg {
+  color: var(--color-error-text);
+}
+
+.error-banner span {
+  flex: 1;
+  min-width: 180px;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+}
+
+.empty-state > svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-3);
+  color: var(--color-leaf);
+}
+
+.empty-state--compact {
+  padding: var(--space-6) var(--space-3);
+}
+
+.empty-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   11. Order tracker page
+   ========================================================= */
+
+.order-head {
+  margin-bottom: var(--space-4);
+}
+
+.order-head .page-title {
+  margin-bottom: var(--space-1);
+}
+
+.tracker-card {
+  margin-bottom: var(--space-5);
+}
+
+.tracker {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.tracker__step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+  text-align: center;
+}
+
+.tracker__dot {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  transition: background var(--speed-normal), border-color var(--speed-normal), color var(--speed-normal);
+}
+
+.tracker__step.is-done .tracker__dot {
+  border-color: var(--color-forest);
+  background: var(--color-forest);
+  color: var(--color-text-on-dark);
+}
+
+.tracker__step.is-current .tracker__dot {
+  border-color: var(--color-leaf);
+  background: var(--color-leaf);
+  color: var(--color-text-on-dark);
+  box-shadow: 0 0 0 4px var(--color-border-sage);
+}
+
+.tracker__step.is-current,
+.tracker__step.is-done {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* The thin bar under the steps fills as the order moves along */
+.tracker__bar {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+}
+
+.tracker__fill {
+  width: 0;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-leaf);
+  transition: width var(--speed-normal) ease-out;
+}
+
+/* When the food is ready, the current step pulses softly */
+.is-ready .tracker__step.is-current .tracker__dot {
+  animation: ready-pulse 2s infinite;
+}
+
+@keyframes ready-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+  70% { box-shadow: 0 0 0 12px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+.cancelled-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--color-error-bg);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.cancelled-box svg {
+  color: var(--color-error-text);
+}
+
+.order-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.pickup-card {
+  text-align: center;
+  animation: sheet-in var(--speed-normal) ease-out;
+}
+
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pickup-card__title {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-h3);
+}
+
+.pickup-card__qr {
+  display: inline-grid;
+  place-items: center;
+  min-width: 200px;
+  min-height: 200px;
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-sage);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.pickup-card__label {
+  margin-bottom: 0;
+  color: var(--color-text-soft);
+  font-size: var(--text-small);
+}
+
+.pickup-card__otp {
+  margin: var(--space-1) 0 var(--space-3);
+  color: var(--color-forest);
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding-left: 0.2em;               /* Balances the spacing after the last digit */
+  line-height: 1.1;
+}
+
+/* After pickup the code is greyed out so nobody mistakes it for a live one */
+.pickup-card.is-used {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+
+.summary-list {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.summary-list__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-h3);
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   12. Order list
+   ========================================================= */
+
+.order-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.order-card {
+  display: block;
+  padding: var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.order-card:hover {
+  color: var(--color-text);
+}
+
+.order-card__top,
+.order-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.order-card__number {
+  font-weight: 600;
+}
+
+.order-card__items {
+  margin: var(--space-2) 0;
+}
+
+.order-card__bottom span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.order-card__bottom svg {
+  width: 16px;
+  height: 16px;
+}
+
+.order-card__total {
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   13. Responsive rules
+   Mobile < 640px | Tablet 640px to 1023px | Desktop 1024px and up
+   ========================================================= */
+
+@media (min-width: 640px) {
+  .food-grid,
+  .order-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .food-card__photo {
+    width: 112px;
+    height: 112px;
+  }
+
+  .toast-area {
+    right: var(--space-5);
+    left: auto;
+    align-items: flex-end;
+  }
+}
+
+@media (min-width: 768px) {
+  .order-columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Phones and small tablets: bottom tab bar, bottom sheets */
+@media (max-width: 767px) {
+  .student-bar__links,
+  .student-bar__logout {
+    display: none;
+  }
+
+  .tab-bar,
+  .cart-bar {
+    display: flex;
+  }
+
+  .student-main {
+    padding-bottom: 150px;           /* Room for the tab bar and the cart bar */
+  }
+
+  .toast-area {
+    bottom: 140px;
+  }
+
+  .tracker__step {
+    font-size: var(--text-caption);
+  }
+}
+
+@media (max-width: 639px) {
+  .student-bar__inner,
+  .menu-toolbar__inner {
+    padding-right: var(--space-4);
+    padding-left: var(--space-4);
+  }
+
+  .student-bar__inner {
+    min-height: 56px;
+  }
+
+  .student-main {
+    padding-right: var(--space-4);
+    padding-left: var(--space-4);
+  }
+
+  /* Veg / Non-veg / Egg chips shrink to just their coloured dot to save space */
+  .diet-filter__label {
+    display: none;
+  }
+
+  .diet-filter .chip {
+    padding: 4px var(--space-3);
+  }
+
+  .diet-filter .chip[data-diet="all"] .diet-filter__label {
+    display: inline;
+  }
+
+  .tracker__dot {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pickup-card__otp {
+    font-size: 2.5rem;
+  }
+
+  /* The drawer slides up from the bottom like a sheet */
+  .drawer {
+    top: auto;
+    left: 0;
+    width: 100%;
+    height: 92vh;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    transform: translateY(100%);
+  }
+
+  .drawer.is-open {
+    transform: translateY(0);
+  }
+
+  /* The food details modal becomes a bottom sheet too */
+  .modal {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 88vh;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    transform: translateY(100%);
+  }
+
+  .modal.is-open {
+    transform: translateY(0);
+  }
+}

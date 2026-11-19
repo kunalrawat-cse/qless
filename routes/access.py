@@ -15,7 +15,7 @@ from flask import flash, g, jsonify, redirect, request, url_for
 def home_url_for_role(role):
     # The page each role lands on after login. Change it here, nowhere else.
     if role == "student":
-        return url_for("main.student_menu")
+        return url_for("student.menu")
     if role in ("staff", "manager"):
         return url_for("main.staff_dashboard")
     return url_for("main.account")

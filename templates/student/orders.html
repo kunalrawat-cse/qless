@@ -1,0 +1,63 @@
+{% extends "student_base.html" %}
+
+{% block title %}My orders - Qless{% endblock %}
+
+{#
+  Small macro: one order card. Used for both the "In progress" and "Past orders" lists.
+  The badge colour comes from the status (see .badge--neutral in student.css).
+#}
+{% macro order_card(order) %}
+  {% set badge_class = {
+    'confirmed': 'badge--neutral',
+    'preparing': 'badge--warning',
+    'ready': 'badge--success',
+    'collected': 'badge--neutral',
+    'cancelled': 'badge--error'
+  }[order.status] %}
+  {% set badge_text = {
+    'confirmed': 'Confirmed',
+    'preparing': 'Preparing',
+    'ready': 'Ready for pickup',
+    'collected': 'Collected',
+    'cancelled': 'Cancelled'
+  }[order.status] %}
+
+  <a class="order-card card card--lift" href="{{ url_for('student.order_detail', order_id=order.id) }}">
+    <div class="order-card__top">
+      <span class="order-card__number num">Order #{{ order.id }}</span>
+      <span class="badge {{ badge_class }}">{{ badge_text }}</span>
+    </div>
+    <p class="order-card__items">{{ order.items_summary }}</p>
+    <div class="order-card__bottom">
+      <span class="text-small text-soft"><i data-lucide="clock-3"></i> {{ order.pickup_label }}</span>
+      <span class="num order-card__total">₹{{ '%g' % order.total_amount }}</span>
+    </div>
+  </a>
+{% endmacro %}
+
+{% block content %}
+  <h1 class="page-title">My orders</h1>
+
+  {% if not active_orders and not past_orders %}
+    <div class="empty-state">
+      <i data-lucide="shopping-bag"></i>
+      <h2>No orders yet</h2>
+      <p class="text-soft">Pick a dish, choose a pickup slot, and skip the queue.</p>
+      <a class="btn btn--primary" href="{{ url_for('student.menu') }}">Browse the menu</a>
+    </div>
+  {% endif %}
+
+  {% if active_orders %}
+    <h2 class="menu-heading">In progress</h2>
+    <div class="order-list">
+      {% for order in active_orders %}{{ order_card(order) }}{% endfor %}
+    </div>
+  {% endif %}
+
+  {% if past_orders %}
+    <h2 class="menu-heading">Past orders</h2>
+    <div class="order-list">
+      {% for order in past_orders %}{{ order_card(order) }}{% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

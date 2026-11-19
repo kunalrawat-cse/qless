@@ -19,7 +19,8 @@ Pandas / NumPy, Chart.js, Matplotlib.
 - Phase 2: MySQL schema, seed data, sample history (done)
 - Phase 3: backend core, auth, roles, password recovery (done)
 - Phase 4: design system CSS and public website (done)
-- Phase 5: student platform
+- Phase 5A: student menu, cart, pickup slots, checkout, live order tracker, QR + OTP (done)
+- Phase 5B: notifications, order history + 1-tap feedback, profile and settings
 - Phase 6: canteen staff platform
 - Phase 7: analytics and exports
 - Phase 8: polish and demo walkthrough

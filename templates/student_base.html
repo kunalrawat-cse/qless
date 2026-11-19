@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% from "partials/logo.html" import logo %}
+
+{#
+  student_base.html - The layout every student page shares:
+    - sticky top bar (logo, Menu / Orders links, cart button, log out)
+    - floating tab bar at the bottom on phones
+    - the cart drawer (cart + pickup slot + payment) and the toast area
+
+  Each student page fills in {% block content %} and may add its own
+  {% block student_scripts %} at the bottom.
+#}
+
+{% block head_extra %}
+  {# fetch() calls read this token and send it back in the X-CSRF-Token header #}
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+{% endblock %}
+
+{% block body %}
+  {% set current_page = request.endpoint %}
+
+  {# The JavaScript reads these data- values (user id for the cart, polling speed) #}
+  <div id="student-app"
+       data-user-id="{{ current_user.id }}"
+       data-poll-seconds="{{ config.POLL_INTERVAL_SECONDS }}">
+
+    <header class="student-bar">
+      <div class="student-bar__inner">
+        {{ logo() }}
+
+        <nav class="student-bar__links" aria-label="Student">
+          <a class="student-bar__link" href="{{ url_for('student.menu') }}"
+             {% if current_page == 'student.menu' %}aria-current="page"{% endif %}>Menu</a>
+          <a class="student-bar__link" href="{{ url_for('student.orders') }}"
+             {% if current_page in ('student.orders', 'student.order_detail') %}aria-current="page"{% endif %}>My orders</a>
+        </nav>
+
+        <div class="student-bar__actions">
+          <button class="cart-button" id="cart-open-button" type="button" aria-label="Open cart">
+            <i data-lucide="shopping-bag"></i>
+            <span class="cart-button__badge" id="cart-badge" hidden>0</span>
+          </button>
+
+          <form class="student-bar__logout" method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <a class="student-bar__name" href="{{ url_for('main.account') }}">{{ current_user.full_name }}</a>
+            <button class="btn btn--outline" type="submit">Log out</button>
+          </form>
+        </div>
+      </div>
+
+      {% block student_toolbar %}{% endblock %}
+    </header>
+
+    {% include "partials/flash_messages.html" %}
+
+    <main id="main-content" class="student-main">
+      {% block content %}{% endblock %}
+    </main>
+
+    {# Floating tab bar, shown on phones only (see student.css) #}
+    <nav class="tab-bar" aria-label="Student tabs">
+      <a class="tab-bar__tab" href="{{ url_for('student.menu') }}"
+         {% if current_page == 'student.menu' %}aria-current="page"{% endif %}>
+        <i data-lucide="utensils"></i><span>Menu</span>
+      </a>
+      <a class="tab-bar__tab" href="{{ url_for('student.orders') }}"
+         {% if current_page in ('student.orders', 'student.order_detail') %}aria-current="page"{% endif %}>
+        <i data-lucide="receipt"></i><span>Orders</span>
+      </a>
+      <a class="tab-bar__tab" href="{{ url_for('main.account') }}"
+         {% if current_page == 'main.account' %}aria-current="page"{% endif %}>
+        <i data-lucide="user-round"></i><span>Profile</span>
+      </a>
+    </nav>
+
+    {# ---------- Cart drawer: JavaScript (cart.js) fills the body ---------- #}
+    <div class="backdrop" id="cart-backdrop" hidden></div>
+    <aside class="drawer" id="cart-drawer" role="dialog" aria-modal="true"
+           aria-labelledby="cart-title" aria-hidden="true">
+      <div class="drawer__header">
+        <h2 id="cart-title">Your cart</h2>
+        <button class="icon-button" id="cart-close-button" type="button" aria-label="Close cart">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="drawer__body" id="cart-body"></div>
+
+      <div class="drawer__footer" id="cart-footer"></div>
+    </aside>
+
+    {# Small non-blocking messages ("Added to cart", "Your order is ready") #}
+    <div class="toast-area" id="toast-area" aria-live="polite"></div>
+  </div>
+{% endblock %}
+
+{% block scripts_extra %}
+  <script src="{{ url_for('static', filename='js/student/common.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/student/cart.js') }}"></script>
+  {% block student_scripts %}{% endblock %}
+{% endblock %}

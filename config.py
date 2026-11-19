@@ -48,5 +48,14 @@ class Config:
     UNCOLLECTED_AFTER_MINUTES = 30      # Flag order for staff after 30 min uncollected
     LOW_STOCK_LIMIT = 5                 # Show "Low Stock" badge at 5 or fewer left
 
+    # ---------- Student ordering rules (edit these safely) ----------
+    SLOT_LEAD_MINUTES = 10              # A slot must start at least 10 min from now (kitchen needs time)
+    MAX_QTY_PER_ITEM = 10               # Most portions of one dish in a single order
+    MAX_DIFFERENT_ITEMS = 8             # Most different dishes in a single order
+    BUSY_SLOT_PERCENT = 80              # Slots at 80% or more show a "Filling fast" warning
+    MENU_CATEGORY_ORDER = [             # Order of the category chips on the menu
+        "Breakfast", "Meals", "Snacks", "Rolls & Wraps", "Beverages",
+    ]
+
     # ---------- Live updates ----------
     POLL_INTERVAL_SECONDS = 15          # Browser refreshes order status every 15 s
