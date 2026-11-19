@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Student menu - Qless{% endblock %}
+
+{% block content %}
+  <h1>Student area</h1>
+  <p>Welcome, {{ current_user.full_name }}. Only students can see this page.</p>
+  <p><small>The real menu comes in Phase 5. This list just proves the database connection works.</small></p>
+
+  <table>
+    <tr>
+      <th>Dish</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>Left</th>
+    </tr>
+    {% for item in menu_items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.category }}</td>
+        <td>Rs. {{ item.price }}</td>
+        <td>{% if item.is_sold_out %}Sold out{% else %}{{ item.stock_qty }}{% endif %}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <p><a href="{{ url_for('main.staff_dashboard') }}">Try the staff page (students should get "Access denied")</a></p>
+{% endblock %}

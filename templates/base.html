@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Qless{% endblock %}</title>
+
+  <!-- TEMPORARY styles for Phase 3. Phase 4 replaces this with variables.css and main.css. -->
+  <style>
+    body { font-family: Arial, sans-serif; background: #FAFDFB; color: #111827; margin: 0; }
+    .temp-header { display: flex; justify-content: space-between; align-items: center;
+                   padding: 12px 24px; background: #064E3B; color: #FFFFFF; }
+    .temp-header form { display: flex; gap: 12px; align-items: center; margin: 0; }
+    .temp-header a { color: #FFFFFF; }
+    main { max-width: 520px; margin: 24px auto; padding: 0 16px; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; margin-top: 4px; box-sizing: border-box;
+                    border: 1px solid #D1D5DB; border-radius: 10px; font-size: 16px; }
+    button { margin-top: 16px; padding: 10px 16px; background: #064E3B; color: #FFFFFF;
+             border: 0; border-radius: 10px; font-size: 16px; cursor: pointer; }
+    .flash { padding: 10px 12px; border-radius: 10px; }
+    .flash-error { background: #FEE2E2; color: #DC2626; }
+    .flash-success { background: #DCFCE7; color: #15803D; }
+    .flash-info { background: #FEF3C7; color: #B45309; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 6px; border-bottom: 1px solid #E5E7EB; }
+  </style>
+</head>
+<body>
+  <header class="temp-header">
+    <strong>Qless</strong>
+
+    {% if current_user %}
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <a href="{{ url_for('main.account') }}">{{ current_user.full_name }} ({{ current_user.role }})</a>
+        <button type="submit" style="margin-top: 0;">Log out</button>
+      </form>
+    {% endif %}
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <p class="flash flash-{{ category }}">{{ message }}</p>
+      {% endfor %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

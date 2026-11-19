@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Create account - Qless{% endblock %}
+
+{% block content %}
+  <h1>Create a student account</h1>
+
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label for="full_name">Full name</label>
+    <input id="full_name" name="full_name" type="text" value="{{ form.get('full_name', '') }}" required autofocus>
+
+    <label for="email">Campus email</label>
+    <input id="email" name="email" type="email" value="{{ form.get('email', '') }}" required>
+
+    <label for="campus_id">Campus ID</label>
+    <input id="campus_id" name="campus_id" type="text" value="{{ form.get('campus_id', '') }}" required>
+
+    <label for="dietary_preference">Dietary preference</label>
+    <select id="dietary_preference" name="dietary_preference">
+      <option value="any" {% if form.get('dietary_preference') == 'any' %}selected{% endif %}>No preference</option>
+      <option value="veg" {% if form.get('dietary_preference') == 'veg' %}selected{% endif %}>Vegetarian</option>
+      <option value="non_veg" {% if form.get('dietary_preference') == 'non_veg' %}selected{% endif %}>Non-vegetarian</option>
+      <option value="egg" {% if form.get('dietary_preference') == 'egg' %}selected{% endif %}>Eggetarian</option>
+    </select>
+
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" required>
+    <small>At least 8 characters, with a letter and a number.</small>
+
+    <label for="confirm_password">Confirm password</label>
+    <input id="confirm_password" name="confirm_password" type="password" required>
+
+    <button type="submit">Create account</button>
+  </form>
+
+  <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+{% endblock %}

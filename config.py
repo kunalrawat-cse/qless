@@ -7,6 +7,7 @@ you can safely edit below.
 """
 
 import os
+from datetime import timedelta
 
 from dotenv import load_dotenv
 
@@ -22,6 +23,12 @@ class Config:
     # ---------- Session / cookie safety ----------
     SESSION_COOKIE_HTTPONLY = True      # JavaScript cannot read the login cookie
     SESSION_COOKIE_SAMESITE = "Lax"     # Helps block cross-site request tricks
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=8)   # Stay logged in for one shift
+
+    # ---------- Passwords and recovery ----------
+    MIN_PASSWORD_LENGTH = 8             # Shortest password allowed at signup
+    RESET_OTP_MINUTES = 10              # A password-reset code works for 10 minutes
+    SHOW_RESET_OTP_ON_SCREEN = True     # Demo mode: show the code on screen (no email server yet)
 
     # ---------- MySQL database ----------
     DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -32,7 +39,7 @@ class Config:
 
     # ---------- Pickup slot rules (edit these safely) ----------
     SLOT_LENGTH_MINUTES = 15            # Each pickup slot is 15 minutes
-    DEFAULT_SLOT_CAPACITY = 12         # Max orders per slot (manager can change later)
+    DEFAULT_SLOT_CAPACITY = 12          # Max orders per slot (manager can change later)
     CANTEEN_OPEN_HOUR = 9               # First slot starts at 09:00
     CANTEEN_CLOSE_HOUR = 17             # Last slot ends at 17:00
 
