@@ -40,8 +40,8 @@ class Config:
     # ---------- Pickup slot rules (edit these safely) ----------
     SLOT_LENGTH_MINUTES = 15            # Each pickup slot is 15 minutes
     DEFAULT_SLOT_CAPACITY = 12          # Max orders per slot (manager can change later)
-    CANTEEN_OPEN_HOUR = 9               # First slot starts at 09:00
-    CANTEEN_CLOSE_HOUR = 17             # Last slot ends at 17:00
+    CANTEEN_OPEN_HOUR = 0               # First slot starts at 00:00 (24-hour testing mode)
+    CANTEEN_CLOSE_HOUR = 24             # Last slot ends at 24:00 (use 9 and 17 for the real demo)
 
     # ---------- Order rules from the blueprint ----------
     CANCEL_BEFORE_SLOT_MINUTES = 10     # Student can cancel until 10 min before pickup

@@ -69,8 +69,10 @@ FEEDBACK_COMMENTS = [
 def build_slot_times(day):
     # Return a list of (start, end) datetimes covering opening to closing time
     slots = []
-    current = datetime.combine(day, time(Config.CANTEEN_OPEN_HOUR, 0))
-    closing = datetime.combine(day, time(Config.CANTEEN_CLOSE_HOUR, 0))
+    # Midnight + hours (not time(hour)), so a close hour of 24 is allowed
+    midnight = datetime.combine(day, time.min)
+    current = midnight + timedelta(hours=Config.CANTEEN_OPEN_HOUR)
+    closing = midnight + timedelta(hours=Config.CANTEEN_CLOSE_HOUR)
     slot_length = timedelta(minutes=Config.SLOT_LENGTH_MINUTES)
 
     while current < closing:
