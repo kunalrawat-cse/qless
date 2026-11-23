@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% from "partials/logo.html" import logo %}
+
+{#
+  canteen_base.html - Shared shell for Kitchen / Counter Staff and Canteen Managers.
+  Strictly separates Rush-Hour Ops (top sidebar group) from Post-Rush & Admin (bottom group).
+#}
+
+{% block head_extra %}
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/canteen.css') }}">
+{% endblock %}
+
+{% block body %}
+  {% set current_page = request.endpoint %}
+  {% set is_manager = current_user and current_user.role == 'manager' %}
+  {% set role_label = 'Canteen Manager' if is_manager else 'Kitchen / Counter Staff' %}
+
+  <div class="canteen-shell"
+       id="canteen-shell"
+       data-poll-seconds="{{ config.POLL_INTERVAL_SECONDS }}">
+
+    {# Mobile backdrop when the sidebar is opened as an overlay on tablets/phones #}
+    <div class="canteen-backdrop" id="canteen-backdrop" hidden></div>
+
+    {# ---------- Collapsible Left Sidebar ---------- #}
+    <aside class="canteen-sidebar" id="canteen-sidebar" aria-label="Canteen navigation">
+      <div class="canteen-sidebar__brand">
+        <div class="canteen-sidebar__logo">
+          {{ logo() }}
+        </div>
+        <button class="canteen-icon-btn canteen-sidebar__collapse-btn"
+                id="sidebar-collapse-btn"
+                type="button"
+                aria-label="Toggle sidebar width"
+                title="Collapse or expand sidebar">
+          <i data-lucide="panel-left-close"></i>
+        </button>
+      </div>
+
+      <nav class="canteen-nav" aria-label="Canteen sections">
+        {# Group 1: Rush-Hour Action Screens #}
+        <div class="canteen-nav__group">
+          <p class="canteen-nav__heading">
+            <span class="canteen-nav__dot canteen-nav__dot--live"></span>
+            <span class="canteen-nav__heading-text">Rush-Hour Ops</span>
+          </p>
+
+          <a class="canteen-nav__link"
+             href="{{ url_for('canteen.dashboard') }}"
+             {% if current_page == 'canteen.dashboard' %}aria-current="page"{% endif %}>
+            <i data-lucide="layout-dashboard"></i>
+            <span class="canteen-nav__label">Dashboard</span>
+          </a>
+
+          <a class="canteen-nav__link"
+             href="{{ url_for('canteen.live_orders') }}"
+             {% if current_page == 'canteen.live_orders' %}aria-current="page"{% endif %}>
+            <i data-lucide="flame"></i>
+            <span class="canteen-nav__label">Live Orders</span>
+          </a>
+
+          <a class="canteen-nav__link"
+             href="{{ url_for('canteen.pickup_queue') }}"
+             {% if current_page == 'canteen.pickup_queue' %}aria-current="page"{% endif %}>
+            <i data-lucide="qr-code"></i>
+            <span class="canteen-nav__label">Pickup Queue</span>
+          </a>
+
+          <a class="canteen-nav__link"
+             href="{{ url_for('canteen.menu_availability') }}"
+             {% if current_page == 'canteen.menu_availability' %}aria-current="page"{% endif %}>
+            <i data-lucide="utensils-crossed"></i>
+            <span class="canteen-nav__label">Menu &amp; Availability</span>
+          </a>
+        </div>
+
+        {# Group 2: Post-Rush & Admin Screens #}
+        <div class="canteen-nav__group canteen-nav__group--secondary">
+          <p class="canteen-nav__heading">
+            <span class="canteen-nav__dot"></span>
+            <span class="canteen-nav__heading-text">Post-Rush &amp; Admin</span>
+          </p>
+
+          <a class="canteen-nav__link"
+             href="{{ url_for('canteen.waste_entry') }}"
+             {% if current_page == 'canteen.waste_entry' %}aria-current="page"{% endif %}>
+            <i data-lucide="trash-2"></i>
+            <span class="canteen-nav__label">Waste Entry</span>
+          </a>
+
+          <a class="canteen-nav__link"
+             href="{{ url_for('canteen.analytics') }}"
+             {% if current_page == 'canteen.analytics' %}aria-current="page"{% endif %}>
+            <i data-lucide="bar-chart-3"></i>
+            <span class="canteen-nav__label">Analytics &amp; Reports</span>
+          </a>
+
+          {% if is_manager %}
+            <a class="canteen-nav__link"
+               href="{{ url_for('canteen.settings') }}"
+               {% if current_page == 'canteen.settings' %}aria-current="page"{% endif %}>
+              <i data-lucide="sliders-horizontal"></i>
+              <span class="canteen-nav__label">Manager Settings</span>
+            </a>
+          {% endif %}
+        </div>
+      </nav>
+
+      <div class="canteen-sidebar__footer">
+        <div class="canteen-user-card">
+          <div class="canteen-user-card__avatar" aria-hidden="true">
+            {{ current_user.full_name[:1] | upper }}
+          </div>
+          <div class="canteen-user-card__meta">
+            <a class="canteen-user-card__name" href="{{ url_for('main.account') }}">
+              {{ current_user.full_name }}
+            </a>
+            <span class="canteen-user-card__role">{{ role_label }}</span>
+          </div>
+        </div>
+
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="canteen-btn canteen-btn--outline canteen-btn--full" type="submit">
+            <i data-lucide="log-out"></i>
+            <span class="canteen-nav__label">Log out</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    {# ---------- Main Content Area ---------- #}
+    <div class="canteen-workspace">
+      <header class="canteen-topbar">
+        <div class="canteen-topbar__left">
+          <button class="canteen-icon-btn canteen-topbar__menu-btn"
+                  id="mobile-sidebar-btn"
+                  type="button"
+                  aria-label="Open navigation">
+            <i data-lucide="menu"></i>
+          </button>
+          <div>
+            <span class="canteen-topbar__eyebrow">Qless Canteen Command</span>
+            <h1 class="canteen-topbar__title">{% block canteen_heading %}Rush-Hour Dashboard{% endblock %}</h1>
+          </div>
+        </div>
+
+        <div class="canteen-topbar__right">
+          <div class="canteen-live-pill" id="canteen-live-pill" title="Auto-refreshes every {{ config.POLL_INTERVAL_SECONDS }} seconds">
+            <span class="canteen-live-pill__dot"></span>
+            <span id="canteen-sync-label">Live • {{ config.POLL_INTERVAL_SECONDS }}s poll</span>
+          </div>
+
+          <span class="canteen-badge {% if is_manager %}canteen-badge--forest{% else %}canteen-badge--mint{% endif %}">
+            {{ role_label }}
+          </span>
+        </div>
+      </header>
+
+      {% include "partials/flash_messages.html" %}
+
+      {# Error / retry banner shown if background polling loses connection #}
+      <div class="canteen-retry-banner" id="canteen-retry-banner" role="alert" hidden>
+        <div class="canteen-retry-banner__text">
+          <i data-lucide="wifi-off"></i>
+          <span id="canteen-retry-text">Connection interrupted. Retrying live sync...</span>
+        </div>
+        <button class="canteen-btn canteen-btn--outline canteen-btn--sm" id="canteen-retry-btn" type="button">
+          Retry Now
+        </button>
+      </div>
+
+      <main id="main-content" class="canteen-main">
+        {% block content %}{% endblock %}
+        {% block canteen_content %}{% endblock %}
+      </main>
+    </div>
+
+    {# Non-blocking toast notifications for 1-tap kitchen actions #}
+    <div class="canteen-toast-area" id="canteen-toast-area" aria-live="polite"></div>
+  </div>
+{% endblock %}
+
+{% block scripts_extra %}
+  <script>
+    (function () {
+        const shell = document.getElementById("canteen-shell");
+        const sidebar = document.getElementById("canteen-sidebar");
+        const collapseBtn = document.getElementById("sidebar-collapse-btn");
+        const mobileBtn = document.getElementById("mobile-sidebar-btn");
+        const backdrop = document.getElementById("canteen-backdrop");
+        const toastArea = document.getElementById("canteen-toast-area");
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const STORAGE_KEY = "qless_canteen_sidebar_collapsed";
+
+        // Restore desktop sidebar collapsed preference from localStorage
+        if (shell && localStorage.getItem(STORAGE_KEY) === "1") {
+            shell.classList.add("canteen-shell--collapsed");
+        }
+
+        if (collapseBtn && shell) {
+            collapseBtn.addEventListener("click", function () {
+                const isCollapsed = shell.classList.toggle("canteen-shell--collapsed");
+                localStorage.setItem(STORAGE_KEY, isCollapsed ? "1" : "0");
+            });
+        }
+
+        function closeMobileSidebar() {
+            if (!sidebar || !backdrop) {
+                return;
+            }
+            sidebar.classList.remove("canteen-sidebar--open");
+            backdrop.hidden = true;
+        }
+
+        if (mobileBtn && sidebar && backdrop) {
+            mobileBtn.addEventListener("click", function () {
+                sidebar.classList.add("canteen-sidebar--open");
+                backdrop.hidden = false;
+            });
+            backdrop.addEventListener("click", closeMobileSidebar);
+        }
+
+        function refreshIcons() {
+            if (window.lucide && typeof window.lucide.createIcons === "function") {
+                window.lucide.createIcons();
+            }
+        }
+
+        function showToast(message, tone) {
+            if (!toastArea) {
+                return;
+            }
+            const toast = document.createElement("div");
+            toast.className = "canteen-toast canteen-toast--" + (tone || "success");
+            toast.textContent = message;
+            toastArea.appendChild(toast);
+
+            window.setTimeout(function () {
+                toast.classList.add("canteen-toast--leaving");
+                window.setTimeout(function () {
+                    toast.remove();
+                }, 220);
+            }, 3200);
+        }
+
+        async function fetchJson(url, options) {
+            const opts = Object.assign({ method: "GET", headers: {} }, options || {});
+            opts.headers = Object.assign(
+                {
+                    "Accept": "application/json",
+                    "X-CSRF-Token": csrfMeta ? csrfMeta.getAttribute("content") : ""
+                },
+                opts.headers
+            );
+
+            if (opts.body && typeof opts.body === "object" && !(opts.body instanceof FormData)) {
+                opts.headers["Content-Type"] = "application/json";
+                opts.body = JSON.stringify(opts.body);
+            }
+
+            const response = await fetch(url, opts);
+            const payload = await response.json().catch(function () {
+                return {};
+            });
+
+            if (!response.ok) {
+                const err = new Error(payload.error || "Request failed. Please try again.");
+                err.status = response.status;
+                throw err;
+            }
+            return payload;
+        }
+
+        window.QlessCanteen = {
+            fetchJson: fetchJson,
+            showToast: showToast,
+            refreshIcons: refreshIcons
+        };
+
+        refreshIcons();
+    })();
+  </script>
+  {% block canteen_scripts %}{% endblock %}
+{% endblock %}

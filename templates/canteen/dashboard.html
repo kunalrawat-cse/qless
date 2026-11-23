@@ -1,0 +1,663 @@
+{% extends "canteen_base.html" %}
+
+{% block title %}Canteen Dashboard - Qless{% endblock %}
+{% block canteen_heading %}Rush-Hour Command ({{ dashboard.today_label }}){% endblock %}
+
+{% block canteen_content %}
+  {# ---------- TOP ROW: 4 Action-Now KPI Cards ---------- #}
+  <section class="kpi-grid" aria-label="Rush-hour key metrics">
+    <article class="kpi-card">
+      <div class="kpi-card__top">
+        <span class="kpi-card__label">Orders Right Now</span>
+        <span class="kpi-card__icon"><i data-lucide="shopping-bag"></i></span>
+      </div>
+      <div class="kpi-card__value" id="kpi-orders-now">{{ dashboard.kpis.orders_right_now }}</div>
+      <div class="kpi-card__meta" id="kpi-orders-breakdown">
+        <span>{{ dashboard.kpis.confirmed_count }} confirmed • {{ dashboard.kpis.preparing_count }} preparing</span>
+        <span class="canteen-badge canteen-badge--success">{{ dashboard.kpis.ready_count }} ready</span>
+      </div>
+    </article>
+
+    <article class="kpi-card">
+      <div class="kpi-card__top">
+        <span class="kpi-card__label">Orders in Next 15 Minutes</span>
+        <span class="kpi-card__icon"><i data-lucide="clock-3"></i></span>
+      </div>
+      <div class="kpi-card__value" id="kpi-orders-next15">{{ dashboard.kpis.orders_next_15m }}</div>
+      <div class="kpi-card__meta">
+        <span>Immediate 15-min pickup wave</span>
+        <a href="{{ url_for('canteen.live_orders') }}">Full queue &rarr;</a>
+      </div>
+    </article>
+
+    <article class="kpi-card">
+      <div class="kpi-card__top">
+        <span class="kpi-card__label">Pickup-Slot Load (%)</span>
+        <span class="kpi-card__icon {% if dashboard.kpis.slot_load_percent >= 80 %}kpi-card__icon--warning{% endif %}">
+          <i data-lucide="gauge"></i>
+        </span>
+      </div>
+      <div class="kpi-card__value" id="kpi-slot-load">{{ dashboard.kpis.slot_load_percent }}%</div>
+      <div class="slot-meter" aria-hidden="true">
+        <div class="slot-meter__fill {% if dashboard.kpis.slot_load_percent >= 80 %}slot-meter__fill--busy{% endif %}"
+             id="kpi-slot-meter"
+             data-load="{{ dashboard.kpis.slot_load_percent }}"></div>
+      </div>
+      <div class="kpi-card__meta" id="kpi-slot-meta">
+        <span>{{ dashboard.kpis.slot_label }}</span>
+        <span>{{ dashboard.kpis.slot_booked }} / {{ dashboard.kpis.slot_capacity }} booked</span>
+      </div>
+    </article>
+
+    <article class="kpi-card {% if dashboard.kpis.low_stock_alerts_count > 0 %}kpi-card--alert{% endif %}"
+             id="kpi-stock-card">
+      <div class="kpi-card__top">
+        <span class="kpi-card__label">Low-Stock / Unavailable Alerts</span>
+        <span class="kpi-card__icon {% if dashboard.kpis.low_stock_alerts_count > 0 %}kpi-card__icon--error{% endif %}">
+          <i data-lucide="alert-triangle"></i>
+        </span>
+      </div>
+      <div class="kpi-card__value" id="kpi-stock-alerts">{{ dashboard.kpis.low_stock_alerts_count }}</div>
+      <div class="kpi-card__meta" id="kpi-stock-meta">
+        <span>{{ dashboard.kpis.sold_out_count }} sold out • {{ dashboard.kpis.low_stock_only_count }} low (&le;5)</span>
+        <a href="{{ url_for('canteen.menu_availability') }}">Manage &rarr;</a>
+      </div>
+    </article>
+  </section>
+
+  {# ---------- MAIN BODY: 65 / 35 Split Command ---------- #}
+  <section class="split-command" aria-label="Split Command workspace">
+
+    {# LEFT 65%: Live Preparation Queue #}
+    <div class="split-command__left">
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="flame"></i>
+              <span>Live Preparation Queue</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Grouped by 15-minute pickup slot • 1-tap transitions notify students automatically
+            </p>
+          </div>
+          <div class="prep-row__actions">
+            <a class="canteen-btn canteen-btn--outline canteen-btn--sm" href="{{ url_for('canteen.pickup_queue') }}">
+              <i data-lucide="qr-code"></i>
+              <span>Verify QR / OTP</span>
+            </a>
+            <a class="canteen-btn canteen-btn--outline canteen-btn--sm" href="{{ url_for('canteen.live_orders') }}">
+              <span>All Orders</span>
+            </a>
+          </div>
+        </header>
+
+        <div class="canteen-card__body" id="prep-queue-container">
+          {% if dashboard.prep_queue_slots %}
+            <div class="slot-group-list">
+              {% for slot in dashboard.prep_queue_slots %}
+                <section class="slot-group {% if slot.is_current_slot %}slot-group--current{% endif %}">
+                  <header class="slot-group__bar">
+                    <div class="slot-group__time">
+                      <i data-lucide="clock"></i>
+                      <span>{{ slot.slot_label }}</span>
+                      {% if slot.is_current_slot %}
+                        <span class="canteen-badge canteen-badge--forest">Active Window</span>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <span class="canteen-badge {% if slot.is_busy %}canteen-badge--warning{% else %}canteen-badge--mint{% endif %}">
+                        {{ slot.booked }}/{{ slot.capacity }} orders ({{ slot.load_percent }}%)
+                      </span>
+                    </div>
+                  </header>
+
+                  <div class="slot-group__orders">
+                    {% for order in slot.orders %}
+                      <div class="prep-row {% if order.is_uncollected %}prep-row--uncollected{% endif %}"
+                           data-order-id="{{ order.id }}">
+                        <div class="prep-row__id-col">
+                          <span class="prep-row__order-num">Order #{{ order.id }}</span>
+                          <span class="prep-row__otp">OTP {{ order.pickup_otp }}</span>
+                        </div>
+
+                        <div class="prep-row__details">
+                          <div class="prep-row__dishes">
+                            {% for item in order['items'] %}                              <span class="dish-pill">
+                                <span class="food-dot food-dot--{{ item.food_type }}"></span>
+                                <span class="dish-pill__qty">{{ item.quantity }}&times;</span>
+                                <span>{{ item.name }}</span>
+                              </span>
+                            {% endfor %}
+                          </div>
+                          <div class="prep-row__meta">
+                            <span><strong>{{ order.student_name }}</strong> ({{ order.campus_id }})</span>
+                            <span>•</span>
+                            <span>{{ order.payment_method_label }} (&#8377;{{ "%.0f"|format(order.total_amount) }})</span>
+                            <span>•</span>
+                            {% if order.status == 'confirmed' %}
+                              <span class="canteen-badge canteen-badge--warning">Confirmed</span>
+                            {% elif order.status == 'preparing' %}
+                              <span class="canteen-badge canteen-badge--mint">Preparing</span>
+                            {% elif order.status == 'ready' %}
+                              <span class="canteen-badge canteen-badge--success">Ready for Pickup</span>
+                            {% endif %}
+                            {% if order.is_uncollected %}
+                              <span class="canteen-badge canteen-badge--urgent">
+                                Uncollected &gt;30m ({{ order.minutes_since_ready }}m)
+                              </span>
+                            {% endif %}
+                          </div>
+                        </div>
+
+                        <div class="prep-row__actions">
+                          {% if order.status == 'confirmed' %}
+                            <button class="canteen-btn canteen-btn--primary js-order-status-btn"
+                                    type="button"
+                                    data-order-id="{{ order.id }}"
+                                    data-next-status="preparing">
+                              <i data-lucide="play"></i>
+                              <span>Start Prep</span>
+                            </button>
+                          {% elif order.status == 'preparing' %}
+                            <button class="canteen-btn canteen-btn--leaf js-order-status-btn"
+                                    type="button"
+                                    data-order-id="{{ order.id }}"
+                                    data-next-status="ready">
+                              <i data-lucide="check-circle-2"></i>
+                              <span>Mark Ready</span>
+                            </button>
+                          {% elif order.status == 'ready' %}
+                            <button class="canteen-btn canteen-btn--outline js-order-status-btn"
+                                    type="button"
+                                    data-order-id="{{ order.id }}"
+                                    data-next-status="collected">
+                              <i data-lucide="package-check"></i>
+                              <span>Mark Collected</span>
+                            </button>
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </section>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="canteen-empty">
+              <i data-lucide="check-circle"></i>
+              <h3 class="canteen-empty__title">Kitchen queue is clear</h3>
+              <p class="canteen-empty__text">
+                No active orders are waiting right now. New student orders will appear here automatically within 15 seconds.
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+    </div>
+
+    {# RIGHT 35%: Batching + Quick Stock Toggles + Operational Alerts #}
+    <div class="split-command__right">
+
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="layers"></i>
+              <span>Next-15-Min Item Batching</span>
+            </h2>
+            <p class="canteen-card__subtitle" id="batch-window-subtitle">
+              Aggregated portions to cook • Window: {{ dashboard.batch_window_label }}
+            </p>
+          </div>
+        </header>
+        <div class="canteen-card__body" id="batch-list-container">
+          {% if dashboard.next_15m_batches %}
+            <div class="batch-list">
+              {% for batch in dashboard.next_15m_batches %}
+                <div class="batch-item">
+                  <div class="batch-item__name">
+                    <span class="food-dot food-dot--{{ batch.food_type }}"></span>
+                    <span>{{ batch.name }}</span>
+                  </div>
+                  <span class="batch-item__count">{{ batch.total_portions }} portions</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="canteen-empty">
+              <p class="canteen-empty__text">No pending kitchen portions to batch right now.</p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="toggle-left"></i>
+              <span>Quick Stock Toggles</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              1-tap Sold Out disables student "+ Add" immediately
+            </p>
+          </div>
+          <a class="canteen-btn canteen-btn--outline canteen-btn--sm" href="{{ url_for('canteen.menu_availability') }}">
+            Batch Qty &rarr;
+          </a>
+        </header>
+        <div class="canteen-card__body" id="quick-stock-container">
+          <div class="stock-toggle-list">
+            {% for item in dashboard.quick_stock_items[:7] %}
+              <div class="stock-row {% if item.is_sold_out %}stock-row--sold-out{% endif %}"
+                   data-item-id="{{ item.id }}">
+                <div class="stock-row__info">
+                  <div class="stock-row__title">
+                    <span class="food-dot food-dot--{{ item.food_type }}"></span>
+                    <span>{{ item.name }}</span>
+                    {% if item.is_sold_out %}
+                      <span class="canteen-badge canteen-badge--error">Sold Out</span>
+                    {% elif item.is_low_stock %}
+                      <span class="canteen-badge canteen-badge--warning">&le;{{ item.stock_qty }} left</span>
+                    {% endif %}
+                  </div>
+                  <span class="stock-row__sub">
+                    {{ item.category }} • Stock: {{ item.stock_qty }} / Batch: {{ item.prepared_batch_qty }}
+                  </span>
+                </div>
+
+                <button class="canteen-btn canteen-btn--sm {% if item.is_sold_out %}canteen-btn--outline{% else %}canteen-btn--danger-outline{% endif %} js-toggle-soldout-btn"
+                        type="button"
+                        data-item-id="{{ item.id }}">
+                  {% if item.is_sold_out %}
+                    <span>Restock</span>
+                  {% else %}
+                    <span>Sold Out</span>
+                  {% endif %}
+                </button>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </article>
+
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="bell-ring"></i>
+              <span>Operational Alerts</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Uncollected orders (&gt;30m), stockouts &amp; slot spikes
+            </p>
+          </div>
+        </header>
+        <div class="canteen-card__body" id="alerts-container">
+          {% if dashboard.operational_alerts %}
+            <div class="alert-list">
+              {% for alert in dashboard.operational_alerts %}
+                <div class="alert-item alert-item--{{ alert.level }}" data-alert-key="{{ alert.key }}">
+                  <span class="alert-item__title">{{ alert.title }}</span>
+                  <span class="alert-item__detail">{{ alert.detail }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="canteen-empty">
+              <p class="canteen-empty__text">No active operational alerts. All slots and dishes look healthy.</p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  {# ---------- BOTTOM COMPACT STRIP ---------- #}
+  <footer class="compact-strip" aria-label="Today's post-rush summary">
+    <div class="compact-strip__metrics">
+      <div class="compact-strip__item">
+        <span class="compact-strip__label">Sales Today:</span>
+        <span class="compact-strip__value" id="strip-sales-amount">
+          &#8377;{{ "%.0f"|format(dashboard.bottom_strip.sales_today_amount) }}
+        </span>
+        <span class="compact-strip__note" id="strip-sales-orders">
+          ({{ dashboard.bottom_strip.collected_orders_today }} collected / {{ dashboard.bottom_strip.total_orders_today }} total orders)
+        </span>
+      </div>
+
+      <div class="compact-strip__item">
+        <span class="compact-strip__label">Waste Logged Today:</span>
+        <span class="compact-strip__value" id="strip-waste-portions">
+          {{ dashboard.bottom_strip.waste_portions_today }} portions
+        </span>
+        <span class="compact-strip__note" id="strip-waste-kg">
+          ({{ "%.2f"|format(dashboard.bottom_strip.waste_kg_today) }} kg across {{ dashboard.bottom_strip.waste_entries_today }} entries)
+        </span>
+      </div>
+    </div>
+
+    <div class="compact-strip__links">
+      <a class="canteen-btn canteen-btn--outline canteen-btn--sm" href="{{ url_for('canteen.waste_entry') }}">
+        <i data-lucide="trash-2"></i>
+        <span>Log Shift Waste</span>
+      </a>
+      <a class="canteen-btn canteen-btn--outline canteen-btn--sm" href="{{ url_for('canteen.analytics') }}">
+        <i data-lucide="bar-chart-3"></i>
+        <span>Post-Rush Analytics &rarr;</span>
+      </a>
+    </div>
+  </footer>
+{% endblock %}
+
+{% block canteen_scripts %}
+  <script>
+    (function () {
+        const shell = document.getElementById("canteen-shell");
+        const pollSeconds = Number(shell ? shell.dataset.pollSeconds : 15) || 15;
+        const syncLabel = document.getElementById("canteen-sync-label");
+        const retryBanner = document.getElementById("canteen-retry-banner");
+        const retryBtn = document.getElementById("canteen-retry-btn");
+        const initialMeter = document.getElementById("kpi-slot-meter");
+
+        if (initialMeter) {
+            initialMeter.style.width = (Number(initialMeter.dataset.load) || 0) + "%";
+        }
+
+        const seenAlertKeys = new Set();
+        document.querySelectorAll("[data-alert-key]").forEach(function (el) {
+            seenAlertKeys.add(el.getAttribute("data-alert-key"));
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text == null ? "" : String(text);
+            return div.innerHTML;
+        }
+
+        function renderStatusBadge(order) {
+            let badge = "";
+            if (order.status === "confirmed") {
+                badge = '<span class="canteen-badge canteen-badge--warning">Confirmed</span>';
+            } else if (order.status === "preparing") {
+                badge = '<span class="canteen-badge canteen-badge--mint">Preparing</span>';
+            } else if (order.status === "ready") {
+                badge = '<span class="canteen-badge canteen-badge--success">Ready for Pickup</span>';
+            }
+            if (order.is_uncollected) {
+                badge += ' <span class="canteen-badge canteen-badge--urgent">Uncollected &gt;30m (' +
+                    order.minutes_since_ready + 'm)</span>';
+            }
+            return badge;
+        }
+
+        function renderActionButton(order) {
+            if (order.status === "confirmed") {
+                return (
+                    '<button class="canteen-btn canteen-btn--primary js-order-status-btn" type="button" ' +
+                    'data-order-id="' + order.id + '" data-next-status="preparing">' +
+                    '<i data-lucide="play"></i><span>Start Prep</span></button>'
+                );
+            }
+            if (order.status === "preparing") {
+                return (
+                    '<button class="canteen-btn canteen-btn--leaf js-order-status-btn" type="button" ' +
+                    'data-order-id="' + order.id + '" data-next-status="ready">' +
+                    '<i data-lucide="check-circle-2"></i><span>Mark Ready</span></button>'
+                );
+            }
+            if (order.status === "ready") {
+                return (
+                    '<button class="canteen-btn canteen-btn--outline js-order-status-btn" type="button" ' +
+                    'data-order-id="' + order.id + '" data-next-status="collected">' +
+                    '<i data-lucide="package-check"></i><span>Mark Collected</span></button>'
+                );
+            }
+            return "";
+        }
+
+        function updateDashboardDom(data) {
+            document.getElementById("kpi-orders-now").textContent = data.kpis.orders_right_now;
+            document.getElementById("kpi-orders-breakdown").innerHTML =
+                "<span>" + data.kpis.confirmed_count + " confirmed • " +
+                data.kpis.preparing_count + " preparing</span>" +
+                '<span class="canteen-badge canteen-badge--success">' + data.kpis.ready_count + " ready</span>";
+
+            document.getElementById("kpi-orders-next15").textContent = data.kpis.orders_next_15m;
+            document.getElementById("kpi-slot-load").textContent = data.kpis.slot_load_percent + "%";
+
+            const meter = document.getElementById("kpi-slot-meter");
+            meter.dataset.load = data.kpis.slot_load_percent;
+            meter.style.width = data.kpis.slot_load_percent + "%";
+            meter.classList.toggle("slot-meter__fill--busy", data.kpis.slot_load_percent >= 80);
+
+            document.getElementById("kpi-slot-meta").innerHTML =
+                "<span>" + escapeHtml(data.kpis.slot_label) + "</span>" +
+                "<span>" + data.kpis.slot_booked + " / " + data.kpis.slot_capacity + " booked</span>";
+
+            document.getElementById("kpi-stock-alerts").textContent = data.kpis.low_stock_alerts_count;
+            document.getElementById("kpi-stock-card").classList.toggle(
+                "kpi-card--alert",
+                data.kpis.low_stock_alerts_count > 0
+            );
+            document.getElementById("kpi-stock-meta").innerHTML =
+                "<span>" + data.kpis.sold_out_count + " sold out • " +
+                data.kpis.low_stock_only_count + " low (&le;5)</span>" +
+                '<a href="/canteen/menu">Manage &rarr;</a>';
+
+            const queueContainer = document.getElementById("prep-queue-container");
+            if (!data.prep_queue_slots || data.prep_queue_slots.length === 0) {
+                queueContainer.innerHTML =
+                    '<div class="canteen-empty">' +
+                    '<i data-lucide="check-circle"></i>' +
+                    '<h3 class="canteen-empty__title">Kitchen queue is clear</h3>' +
+                    '<p class="canteen-empty__text">No active orders are waiting right now. ' +
+                    "New student orders will appear here automatically within 15 seconds.</p></div>";
+            } else {
+                const groupsHtml = data.prep_queue_slots.map(function (slot) {
+                    const activeBadge = slot.is_current_slot
+                        ? '<span class="canteen-badge canteen-badge--forest">Active Window</span>'
+                        : "";
+                    const loadBadgeClass = slot.is_busy ? "canteen-badge--warning" : "canteen-badge--mint";
+
+                    const ordersHtml = slot.orders.map(function (order) {
+                        const dishesHtml = order.items.map(function (item) {
+                            return (
+                                '<span class="dish-pill">' +
+                                '<span class="food-dot food-dot--' + escapeHtml(item.food_type) + '"></span>' +
+                                '<span class="dish-pill__qty">' + item.quantity + "&times;</span>" +
+                                "<span>" + escapeHtml(item.name) + "</span></span>"
+                            );
+                        }).join("");
+
+                        return (
+                            '<div class="prep-row ' + (order.is_uncollected ? "prep-row--uncollected" : "") + '" ' +
+                            'data-order-id="' + order.id + '">' +
+                            '<div class="prep-row__id-col">' +
+                            '<span class="prep-row__order-num">Order #' + order.id + "</span>" +
+                            '<span class="prep-row__otp">OTP ' + escapeHtml(order.pickup_otp) + "</span></div>" +
+                            '<div class="prep-row__details">' +
+                            '<div class="prep-row__dishes">' + dishesHtml + "</div>" +
+                            '<div class="prep-row__meta">' +
+                            "<span><strong>" + escapeHtml(order.student_name) + "</strong> (" +
+                            escapeHtml(order.campus_id) + ")</span><span>•</span>" +
+                            "<span>" + escapeHtml(order.payment_method_label) + " (&#8377;" +
+                            Math.round(order.total_amount) + ")</span><span>•</span>" +
+                            renderStatusBadge(order) + "</div></div>" +
+                            '<div class="prep-row__actions">' + renderActionButton(order) + "</div></div>"
+                        );
+                    }).join("");
+
+                    return (
+                        '<section class="slot-group ' + (slot.is_current_slot ? "slot-group--current" : "") + '">' +
+                        '<header class="slot-group__bar">' +
+                        '<div class="slot-group__time"><i data-lucide="clock"></i>' +
+                        "<span>" + escapeHtml(slot.slot_label) + "</span>" + activeBadge + "</div>" +
+                        '<div><span class="canteen-badge ' + loadBadgeClass + '">' +
+                        slot.booked + "/" + slot.capacity + " orders (" + slot.load_percent + "%)</span></div></header>" +
+                        '<div class="slot-group__orders">' + ordersHtml + "</div></section>"
+                    );
+                }).join("");
+
+                queueContainer.innerHTML = '<div class="slot-group-list">' + groupsHtml + "</div>";
+            }
+
+            document.getElementById("batch-window-subtitle").textContent =
+                "Aggregated portions to cook • Window: " + data.batch_window_label;
+            const batchContainer = document.getElementById("batch-list-container");
+            if (!data.next_15m_batches || data.next_15m_batches.length === 0) {
+                batchContainer.innerHTML =
+                    '<div class="canteen-empty"><p class="canteen-empty__text">' +
+                    "No pending kitchen portions to batch right now.</p></div>";
+            } else {
+                const batchesHtml = data.next_15m_batches.map(function (b) {
+                    return (
+                        '<div class="batch-item">' +
+                        '<div class="batch-item__name">' +
+                        '<span class="food-dot food-dot--' + escapeHtml(b.food_type) + '"></span>' +
+                        "<span>" + escapeHtml(b.name) + "</span></div>" +
+                        '<span class="batch-item__count">' + b.total_portions + " portions</span></div>"
+                    );
+                }).join("");
+                batchContainer.innerHTML = '<div class="batch-list">' + batchesHtml + "</div>";
+            }
+
+            const stockContainer = document.getElementById("quick-stock-container");
+            const visibleStock = (data.quick_stock_items || []).slice(0, 7);
+            const stockHtml = visibleStock.map(function (item) {
+                let statusBadge = "";
+                if (item.is_sold_out) {
+                    statusBadge = '<span class="canteen-badge canteen-badge--error">Sold Out</span>';
+                } else if (item.is_low_stock) {
+                    statusBadge = '<span class="canteen-badge canteen-badge--warning">&le;' + item.stock_qty + " left</span>";
+                }
+                const btnClass = item.is_sold_out ? "canteen-btn--outline" : "canteen-btn--danger-outline";
+                const btnText = item.is_sold_out ? "Restock" : "Sold Out";
+
+                return (
+                    '<div class="stock-row ' + (item.is_sold_out ? "stock-row--sold-out" : "") + '" ' +
+                    'data-item-id="' + item.id + '">' +
+                    '<div class="stock-row__info">' +
+                    '<div class="stock-row__title">' +
+                    '<span class="food-dot food-dot--' + escapeHtml(item.food_type) + '"></span>' +
+                    "<span>" + escapeHtml(item.name) + "</span> " + statusBadge + "</div>" +
+                    '<span class="stock-row__sub">' + escapeHtml(item.category) +
+                    " • Stock: " + item.stock_qty + " / Batch: " + item.prepared_batch_qty + "</span></div>" +
+                    '<button class="canteen-btn canteen-btn--sm ' + btnClass + ' js-toggle-soldout-btn" ' +
+                    'type="button" data-item-id="' + item.id + '">' +
+                    "<span>" + btnText + "</span></button></div>"
+                );
+            }).join("");
+            stockContainer.innerHTML = '<div class="stock-toggle-list">' + stockHtml + "</div>";
+
+            const alertsContainer = document.getElementById("alerts-container");
+            if (!data.operational_alerts || data.operational_alerts.length === 0) {
+                alertsContainer.innerHTML =
+                    '<div class="canteen-empty"><p class="canteen-empty__text">' +
+                    "No active operational alerts. All slots and dishes look healthy.</p></div>";
+            } else {
+                const alertsHtml = data.operational_alerts.map(function (alert) {
+                    const isFresh = !seenAlertKeys.has(alert.key);
+                    seenAlertKeys.add(alert.key);
+                    return (
+                        '<div class="alert-item alert-item--' + escapeHtml(alert.level) +
+                        (isFresh ? " alert-item--fresh" : "") + '" data-alert-key="' + escapeHtml(alert.key) + '">' +
+                        '<span class="alert-item__title">' + escapeHtml(alert.title) + "</span>" +
+                        '<span class="alert-item__detail">' + escapeHtml(alert.detail) + "</span></div>"
+                    );
+                }).join("");
+                alertsContainer.innerHTML = '<div class="alert-list">' + alertsHtml + "</div>";
+
+                window.setTimeout(function () {
+                    alertsContainer.querySelectorAll(".alert-item--fresh").forEach(function (el) {
+                        el.classList.remove("alert-item--fresh");
+                    });
+                }, 3000);
+            }
+
+            document.getElementById("strip-sales-amount").innerHTML =
+                "&#8377;" + Math.round(data.bottom_strip.sales_today_amount);
+            document.getElementById("strip-sales-orders").textContent =
+                "(" + data.bottom_strip.collected_orders_today + " collected / " +
+                data.bottom_strip.total_orders_today + " total orders)";
+            document.getElementById("strip-waste-portions").textContent =
+                data.bottom_strip.waste_portions_today + " portions";
+            document.getElementById("strip-waste-kg").textContent =
+                "(" + Number(data.bottom_strip.waste_kg_today).toFixed(2) + " kg across " +
+                data.bottom_strip.waste_entries_today + " entries)";
+
+            if (syncLabel && data.server_time) {
+                syncLabel.textContent = "Synced " + data.server_time;
+            }
+
+            window.QlessCanteen.refreshIcons();
+        }
+
+        async function refreshDashboard() {
+            try {
+                const payload = await window.QlessCanteen.fetchJson("/api/canteen/dashboard");
+                if (retryBanner) {
+                    retryBanner.hidden = true;
+                }
+                updateDashboardDom(payload);
+            } catch (error) {
+                if (retryBanner) {
+                    retryBanner.hidden = false;
+                }
+            }
+        }
+
+        document.addEventListener("click", async function (event) {
+            const statusBtn = event.target.closest(".js-order-status-btn");
+            if (statusBtn) {
+                const orderId = statusBtn.getAttribute("data-order-id");
+                const nextStatus = statusBtn.getAttribute("data-next-status");
+                statusBtn.disabled = true;
+                try {
+                    const res = await window.QlessCanteen.fetchJson(
+                        "/api/canteen/orders/" + orderId + "/status",
+                        {
+                            method: "POST",
+                            body: { next_status: nextStatus }
+                        }
+                    );
+                    window.QlessCanteen.showToast(res.message, "success");
+                    await refreshDashboard();
+                } catch (error) {
+                    window.QlessCanteen.showToast(error.message, "error");
+                    statusBtn.disabled = false;
+                }
+                return;
+            }
+
+            const stockBtn = event.target.closest(".js-toggle-soldout-btn");
+            if (stockBtn) {
+                const itemId = stockBtn.getAttribute("data-item-id");
+                stockBtn.disabled = true;
+                try {
+                    const res = await window.QlessCanteen.fetchJson(
+                        "/api/canteen/menu/" + itemId + "/stock",
+                        {
+                            method: "POST",
+                            body: { action: "toggle_sold_out" }
+                        }
+                    );
+                    window.QlessCanteen.showToast(res.message, res.item.is_sold_out ? "warning" : "success");
+                    await refreshDashboard();
+                } catch (error) {
+                    window.QlessCanteen.showToast(error.message, "error");
+                    stockBtn.disabled = false;
+                }
+            }
+        });
+
+        if (retryBtn) {
+            retryBtn.addEventListener("click", refreshDashboard);
+        }
+
+        window.setInterval(refreshDashboard, pollSeconds * 1000);
+    })();
+  </script>
+{% endblock %}

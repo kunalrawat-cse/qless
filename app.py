@@ -14,6 +14,7 @@ from config import Config
 from db import fetch_one
 from routes.access import role_required
 from routes.auth import auth_bp
+from routes.canteen import canteen_bp
 from routes.main import main_bp
 from routes.public import public_bp
 from routes.security import check_csrf_token, csrf_token
@@ -27,6 +28,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(main_bp)
 app.register_blueprint(public_bp)
 app.register_blueprint(student_bp)
+app.register_blueprint(canteen_bp)
 
 
 @app.before_request

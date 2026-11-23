@@ -17,7 +17,7 @@ def home_url_for_role(role):
     if role == "student":
         return url_for("student.menu")
     if role in ("staff", "manager"):
-        return url_for("main.staff_dashboard")
+        return url_for("canteen.dashboard")
     return url_for("main.account")
 
 
