@@ -31,11 +31,24 @@ class Config:
     SHOW_RESET_OTP_ON_SCREEN = True     # Demo mode: show the code on screen (no email server yet)
 
     # ---------- MySQL database ----------
+    
+    # ---------- MySQL database ----------
     DB_HOST = os.getenv("DB_HOST", "localhost")
     DB_PORT = int(os.getenv("DB_PORT", "3306"))
     DB_USER = os.getenv("DB_USER", "root")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "")
     DB_NAME = os.getenv("DB_NAME", "qless_db")
+
+    # ---------- Database SSL ----------
+    DB_SSL_CA = os.getenv(
+        "DB_SSL_CA",
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "certs",
+            "ca.pem"
+        )
+    )
+
 
     # ---------- Pickup slot rules (edit these safely) ----------
     SLOT_LENGTH_MINUTES = 15            # Each pickup slot is 15 minutes
@@ -59,3 +72,9 @@ class Config:
 
     # ---------- Live updates ----------
     POLL_INTERVAL_SECONDS = 15          # Browser refreshes order status every 15 s
+
+    DB_SSL_CA = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "certs",
+    "ca.pem"
+)

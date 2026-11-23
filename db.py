@@ -1,3 +1,4 @@
+
 """
 db.py - The ONE place that talks to MySQL.
 
@@ -18,7 +19,7 @@ from config import Config
 
 
 def get_connection():
-    # Open a new connection using the settings from config.py / .env
+    # Open a secure connection to MySQL / TiDB Cloud
     return pymysql.connect(
         host=Config.DB_HOST,
         port=Config.DB_PORT,
@@ -27,6 +28,13 @@ def get_connection():
         database=Config.DB_NAME,
         charset="utf8mb4",
         cursorclass=DictCursor,
+
+        # TiDB Cloud SSL configuration
+        ssl={
+            "ca": Config.DB_SSL_CA
+        },
+        ssl_verify_cert=True,
+        ssl_verify_identity=True,
     )
 
 
