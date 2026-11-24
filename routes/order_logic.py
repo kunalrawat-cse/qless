@@ -74,7 +74,6 @@ def create_slots_if_missing(day):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            # Midnight + hours (not time(hour)), so a close hour of 24 means "open all night"
             midnight = datetime.combine(day, time.min)
             current = midnight + timedelta(hours=Config.CANTEEN_OPEN_HOUR)
             closing = midnight + timedelta(hours=Config.CANTEEN_CLOSE_HOUR)
