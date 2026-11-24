@@ -123,7 +123,8 @@
 
                         <div class="prep-row__details">
                           <div class="prep-row__dishes">
-                            {% for item in order['items'] %}                              <span class="dish-pill">
+                            {% for item in order['items'] %}
+                              <span class="dish-pill">
                                 <span class="food-dot food-dot--{{ item.food_type }}"></span>
                                 <span class="dish-pill__qty">{{ item.quantity }}&times;</span>
                                 <span>{{ item.name }}</span>

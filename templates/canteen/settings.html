@@ -1,0 +1,170 @@
+{% extends "canteen_base.html" %}
+
+{% block title %}Manager Settings - Qless Canteen{% endblock %}
+{% block canteen_heading %}Manager Settings — 15-Min Slot Capacities &amp; Staff{% endblock %}
+
+{% block canteen_content %}
+  <div id="canteen-settings-page" class="split-command">
+
+    {# ---------- LEFT 65%: 15-Minute Pickup Slot Capacity Controls ---------- #}
+    <div class="split-command__left">
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="sliders-horizontal"></i>
+              <span>15-Minute Pickup Slot Capacity Settings</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Once a 15-minute window hits 100% capacity, students are automatically guided to the next open slot
+            </p>
+          </div>
+
+          <form id="bulk-slot-capacity-form" class="inline-qty-group">
+            <label class="canteen-label" for="bulk-capacity-input">Set All Today:</label>
+            <input class="canteen-input canteen-input--num"
+                   id="bulk-capacity-input"
+                   name="capacity"
+                   type="number"
+                   min="1"
+                   max="200"
+                   value="{{ default_capacity }}"
+                   required>
+            <button class="canteen-btn canteen-btn--primary canteen-btn--sm" type="submit">
+              Apply to All Slots
+            </button>
+          </form>
+        </header>
+
+        <div class="canteen-table-wrap">
+          <table class="canteen-table">
+            <thead>
+              <tr>
+                <th>15-Min Pickup Window</th>
+                <th>Orders Booked</th>
+                <th>Slot Load</th>
+                <th>Max Orders Capacity</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for slot in slots %}
+                <tr>
+                  <td class="num-cell"><strong>{{ slot.slot_label }}</strong></td>
+                  <td class="num-cell">{{ slot.booked }} booked</td>
+                  <td>
+                    <span class="canteen-badge {% if slot.load_percent >= 80 %}canteen-badge--warning{% else %}canteen-badge--mint{% endif %}">
+                      {{ slot.load_percent }}%
+                    </span>
+                  </td>
+                  <td>
+                    <input class="canteen-input canteen-input--num js-slot-cap-input"
+                           type="number"
+                           min="1"
+                           max="200"
+                           value="{{ slot.capacity }}"
+                           data-slot-id="{{ slot.id }}"
+                           aria-label="Capacity for slot {{ slot.slot_label }}">
+                  </td>
+                  <td>
+                    <button class="canteen-btn canteen-btn--outline canteen-btn--sm js-save-slot-btn"
+                            type="button"
+                            data-slot-id="{{ slot.id }}">
+                      Update Slot
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+
+    {# ---------- RIGHT 35%: Staff & Manager Accounts ---------- #}
+    <div class="split-command__right">
+
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="user-plus"></i>
+              <span>Add Canteen Staff Account</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Public signup only creates student accounts • Add kitchen/counter staff here
+            </p>
+          </div>
+        </header>
+
+        <div class="canteen-card__body">
+          <form id="create-staff-form" class="canteen-form-grid" autocomplete="off">
+            <div class="canteen-field canteen-field--full">
+              <label class="canteen-label" for="staff-name-input">Full Name</label>
+              <input class="canteen-input" id="staff-name-input" name="full_name" type="text" maxlength="100" required>
+            </div>
+
+            <div class="canteen-field canteen-field--full">
+              <label class="canteen-label" for="staff-email-input">Campus / Work Email</label>
+              <input class="canteen-input" id="staff-email-input" name="email" type="email" maxlength="120" required>
+            </div>
+
+            <div class="canteen-field">
+              <label class="canteen-label" for="staff-id-input">Staff ID</label>
+              <input class="canteen-input" id="staff-id-input" name="campus_id" type="text" maxlength="30" placeholder="STF-104">
+            </div>
+
+            <div class="canteen-field">
+              <label class="canteen-label" for="staff-role-select">Role</label>
+              <select class="canteen-select" id="staff-role-select" name="role" required>
+                <option value="staff">Kitchen / Counter Staff</option>
+                <option value="manager">Canteen Manager</option>
+              </select>
+            </div>
+
+            <div class="canteen-field canteen-field--full">
+              <label class="canteen-label" for="staff-password-input">Temporary Password (8+ chars, letter + number)</label>
+              <input class="canteen-input" id="staff-password-input" name="password" type="password" minlength="8" required>
+            </div>
+
+            <div class="canteen-field canteen-field--full">
+              <button class="canteen-btn canteen-btn--primary canteen-btn--full" type="submit">
+                <i data-lucide="user-check"></i>
+                <span>Create Staff Account</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </article>
+
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="users"></i>
+              <span>Canteen Team ({{ staff_users | length }})</span>
+            </h2>
+          </div>
+        </header>
+
+        <div class="canteen-card__body">
+          <div class="batch-list">
+            {% for member in staff_users %}
+              <div class="batch-item">
+                <div class="stock-row__info">
+                  <span class="stock-row__title">{{ member.full_name }}</span>
+                  <span class="stock-row__sub">{{ member.email }} • {{ member.campus_id or 'No ID' }}</span>
+                </div>
+                <span class="canteen-badge {% if member.role == 'manager' %}canteen-badge--forest{% else %}canteen-badge--mint{% endif %}">
+                  {{ 'Manager' if member.role == 'manager' else 'Staff' }}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+  </div>
+{% endblock %}

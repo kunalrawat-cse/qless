@@ -51,7 +51,6 @@ NEXT_STATUS_MAP = {
     "ready": "collected",
 }
 
-# Used for Phase 7 Analytics (and any Phase 6B screen before its template file is added)
 PLACEHOLDER_TEMPLATE = """
 {% extends "canteen_base.html" %}
 {% block title %}{{ page_title }} - Qless Canteen{% endblock %}
@@ -86,8 +85,7 @@ def json_error(message, status_code=400):
     return jsonify({"error": message}), status_code
 
 
-def render_canteen_page(template_name, page_title, page_note, phase_label="Phase 6B / Phase 7", **context):
-    # Renders the real template file when present, or a clean canteen layout fallback
+def render_canteen_page(template_name, page_title, page_note, phase_label="Phase 7", **context):
     try:
         return render_template(template_name, **context)
     except TemplateNotFound:
@@ -219,7 +217,6 @@ def build_dashboard_payload():
     create_slots_if_missing(today)
     flag_overdue_uncollected_orders()
 
-    # ---- 1. Today's 15-minute slots and booking counts ----
     today_slots = fetch_all(
         """
         SELECT s.id, s.slot_date, s.start_time, s.end_time, s.capacity,
@@ -235,7 +232,6 @@ def build_dashboard_payload():
     slots_by_id = {slot["id"]: slot for slot in today_slots}
     focus_slot = get_active_or_next_slot(today_slots, now.time())
 
-    # ---- 2. Active orders today (confirmed, preparing, ready) ----
     active_order_rows = fetch_all(
         """
         SELECT o.id, o.student_id, o.slot_id, o.status, o.payment_method,
@@ -256,7 +252,6 @@ def build_dashboard_payload():
     )
     items_by_order = attach_items_to_orders(active_order_rows)
 
-    # ---- 3. Group active orders by 15-minute pickup slot for the Left 65% panel ----
     slot_groups_map = {}
     orders_next_15m = 0
     window_end = now + timedelta(minutes=Config.SLOT_LENGTH_MINUTES)
@@ -266,7 +261,6 @@ def build_dashboard_payload():
         slot_start = build_slot_start(row["slot_date"], row["start_time"])
         slot_end = build_slot_start(row["slot_date"], row["end_time"])
 
-        # Count orders belonging to the current or next 15-minute pickup window
         if (slot_start <= now <= slot_end) or (now <= slot_start <= window_end):
             orders_next_15m += 1
 
@@ -292,12 +286,9 @@ def build_dashboard_payload():
 
     prep_queue_slots = list(slot_groups_map.values())
 
-    # If no order sits inside the immediate 15-minute clock window, show the next active slot's count
     if orders_next_15m == 0 and prep_queue_slots:
         orders_next_15m = len(prep_queue_slots[0]["orders"])
 
-    # ---- 4. Next-15-Min Item Batching (Right 35% top card) ----
-    # Aggregate un-finished dishes (confirmed + preparing) in the immediate/next active slot(s)
     target_slot_ids = []
     for group in prep_queue_slots:
         has_kitchen_work = any(o["status"] in ("confirmed", "preparing") for o in group["orders"])
@@ -340,7 +331,6 @@ def build_dashboard_payload():
         key=lambda b: (-b["total_portions"], b["name"]),
     )
 
-    # ---- 5. Menu stock status & Quick Stock Toggles (Right 35% middle card) ----
     menu_rows = fetch_all(
         """
         SELECT id, name, category, price, food_type, stock_qty,
@@ -372,10 +362,8 @@ def build_dashboard_payload():
             "is_low_stock": is_low_stock,
         })
 
-    # ---- 6. Operational Alerts (Right 35% bottom card) ----
     operational_alerts = []
 
-    # Alert priority 1: Uncollected orders > 30 mins
     for row in active_order_rows:
         if row["status"] == "ready" and row["uncollected_flag"]:
             ready_time = row.get("ready_at") or row.get("created_at") or now
@@ -392,7 +380,6 @@ def build_dashboard_payload():
                 "order_id": row["id"],
             })
 
-    # Alert priority 2: Sold-out dishes
     for item in quick_stock_items:
         if item["is_sold_out"]:
             operational_alerts.append({
@@ -413,7 +400,6 @@ def build_dashboard_payload():
                 "item_id": item["id"],
             })
 
-    # Alert priority 3: High-load pickup slots (>= 80%)
     for group in prep_queue_slots:
         if group["is_busy"]:
             operational_alerts.append({
@@ -425,8 +411,6 @@ def build_dashboard_payload():
                 "slot_id": group["slot_id"],
             })
 
-    # ---- 7. Pickup-Slot Load KPI calculation ----
-    # Prefer the busiest active queue slot or the current clock slot
     kpi_slot = None
     if prep_queue_slots:
         kpi_slot = max(prep_queue_slots, key=lambda s: s["load_percent"])
@@ -447,7 +431,6 @@ def build_dashboard_payload():
             "load_percent": 0,
         }
 
-    # ---- 8. Bottom Compact Strip: Sales Today & Waste Logged Today ----
     sales_row = fetch_one(
         """
         SELECT COALESCE(SUM(o.total_amount), 0) AS total_revenue,
@@ -591,9 +574,9 @@ def live_orders():
         status_filter = "all"
     queue_data = build_live_orders_payload(status_filter)
     return render_canteen_page(
-        "canteen/live_orders.html",
+        "canteen/orders.html",
         page_title="Live Orders & Kitchen Queue",
-        page_note="Slot-grouped live kitchen queue will be added in Phase 6B.",
+        page_note="Slot-grouped live kitchen queue.",
         phase_label="Phase 6B",
         queue=queue_data,
     )
@@ -647,9 +630,9 @@ def pickup_queue():
     ]
 
     return render_canteen_page(
-        "canteen/pickup_queue.html",
+        "canteen/pickup.html",
         page_title="Pickup Queue — QR & 4-Digit OTP Verification",
-        page_note="Fast counter QR/OTP lookup and meal handover verification screen (Phase 6B).",
+        page_note="Fast counter QR/OTP lookup and meal handover verification screen.",
         phase_label="Phase 6B",
         ready_orders=ready_orders,
         recent_collected=recent_collected,
@@ -678,9 +661,9 @@ def menu_availability():
     )
 
     return render_canteen_page(
-        "canteen/menu_availability.html",
+        "canteen/menu_manage.html",
         page_title="Menu & Item Availability",
-        page_note="Quick Sold Out toggles and Today's Prepared Batch Qty editor (Phase 6B).",
+        page_note="Quick Sold Out toggles and Today's Prepared Batch Qty editor.",
         phase_label="Phase 6B",
         dishes=dishes,
         categories=Config.MENU_CATEGORY_ORDER,
@@ -734,9 +717,9 @@ def waste_entry():
     )
 
     return render_canteen_page(
-        "canteen/waste_entry.html",
+        "canteen/waste.html",
         page_title="Shift & End-of-Day Waste Entry",
-        page_note="Fast shift waste logging by dish, portions/weight and reason (Phase 6B).",
+        page_note="Fast shift waste logging by dish, portions/weight and reason.",
         phase_label="Phase 6B",
         dishes=dishes,
         today_logs=today_logs,
@@ -805,7 +788,7 @@ def settings():
     return render_canteen_page(
         "canteen/settings.html",
         page_title="Manager Settings — Slots, Menu & Staff",
-        page_note="15-minute slot capacity controls, dish creation/editing, and staff accounts (Phase 6B).",
+        page_note="15-minute slot capacity controls, dish creation/editing, and staff accounts.",
         phase_label="Phase 6B",
         slots=slots,
         dishes=all_dishes,
@@ -883,7 +866,6 @@ def api_update_order_status(order_id):
                     "UPDATE orders SET status = 'ready', ready_at = %s WHERE id = %s",
                     (now, order_id),
                 )
-                # Let the student's notification bell know their meal is waiting at the counter
                 cursor.execute(
                     """
                     INSERT INTO notifications (user_id, message, type)
@@ -939,7 +921,6 @@ def api_pickup_verify():
     now = datetime.now()
     today = now.date()
 
-    # If the staff member clicked "Verify & Hand Over" on a specific matched order card
     if explicit_order_id is not None:
         try:
             explicit_order_id = int(explicit_order_id)
@@ -964,7 +945,6 @@ def api_pickup_verify():
         if not raw_code:
             return json_error("Enter a 4-digit Pickup OTP or scan a QR token.", 400)
 
-        # Allow formats like "QLESS:token", "#14", or a 4-digit OTP "4821"
         cleaned_code = raw_code.replace("QLESS:", "").lstrip("#").strip()
 
         rows = fetch_all(
@@ -1054,7 +1034,6 @@ def api_update_menu_stock(item_id):
     if action == "toggle_sold_out":
         currently_sold_out = bool(item["is_sold_out"]) or new_stock <= 0
         if currently_sold_out:
-            # Restocking via 1-tap: restore a sensible default if stock was 0
             restock_default = int(data.get("restock_qty") or max(10, new_batch or 10))
             new_stock = new_stock if new_stock > 0 else restock_default
             new_sold_out = 0
@@ -1095,7 +1074,6 @@ def api_update_menu_stock(item_id):
         (new_stock, new_batch, new_sold_out, item_id),
     )
 
-    # Keep daily_batches in sync so Phase 7 Prepared vs. Sold charts have daily history
     if batch_was_updated:
         execute(
             """

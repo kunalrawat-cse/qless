@@ -194,7 +194,6 @@
         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
         const STORAGE_KEY = "qless_canteen_sidebar_collapsed";
 
-        // Restore desktop sidebar collapsed preference from localStorage
         if (shell && localStorage.getItem(STORAGE_KEY) === "1") {
             shell.classList.add("canteen-shell--collapsed");
         }
@@ -282,5 +281,6 @@
         refreshIcons();
     })();
   </script>
+  <script src="{{ url_for('static', filename='js/canteen.js') }}"></script>
   {% block canteen_scripts %}{% endblock %}
 {% endblock %}

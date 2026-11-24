@@ -1,0 +1,252 @@
+{% extends "canteen_base.html" %}
+
+{% block title %}Menu & Availability - Qless Canteen{% endblock %}
+{% block canteen_heading %}Menu, Live Stock &amp; Today's Prepared Batch Qty{% endblock %}
+
+{% block canteen_content %}
+  {% set is_manager = current_user and current_user.role == 'manager' %}
+
+  <div id="canteen-menu-page">
+
+    {# ---------- Category Chips, Search Input & Manager Add Dish Button ---------- #}
+    <section class="canteen-toolbar" aria-label="Menu filters">
+      <div class="filter-tabs" id="menu-category-tabs">
+        <button class="filter-tab filter-tab--active" type="button" data-category="all">
+          All Categories ({{ dishes | length }})
+        </button>
+        {% for cat in categories %}
+          <button class="filter-tab" type="button" data-category="{{ cat }}">
+            {{ cat }}
+          </button>
+        {% endfor %}
+      </div>
+
+      <div class="prep-row__actions">
+        <input class="canteen-input"
+               id="menu-search-input"
+               type="search"
+               placeholder="Search dish name..."
+               aria-label="Search dish name">
+
+        {% if is_manager %}
+          <button class="canteen-btn canteen-btn--primary" id="open-add-dish-btn" type="button">
+            <i data-lucide="plus"></i>
+            <span>Add Dish</span>
+          </button>
+        {% endif %}
+      </div>
+    </section>
+
+    {# ---------- Menu & Prepared Batch Table ---------- #}
+    <article class="canteen-card">
+      <header class="canteen-card__header">
+        <div class="canteen-card__title-group">
+          <h2 class="canteen-card__title">
+            <i data-lucide="utensils-crossed"></i>
+            <span>Dish Availability &amp; Shift Batch Tracking</span>
+          </h2>
+          <p class="canteen-card__subtitle">
+            Enter "Today's Prepared Batch Qty" at the start or end of shift for Prepared vs. Sold waste analytics
+          </p>
+        </div>
+      </header>
+
+      <div class="canteen-table-wrap">
+        <table class="canteen-table" id="canteen-menu-table">
+          <thead>
+            <tr>
+              <th>Dish</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Today's Prepared Batch Qty</th>
+              <th>Sold Today</th>
+              <th>Live Stock Qty</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dish in dishes %}
+              {% set sold_out = dish.is_sold_out or dish.stock_qty <= 0 %}
+              {% set low_stock = (not sold_out) and (dish.stock_qty <= low_stock_limit) %}
+              <tr class="{% if sold_out %}is-sold-out-row{% endif %}"
+                  data-dish-row="{{ dish.id }}"
+                  data-category="{{ dish.category }}"
+                  data-name="{{ dish.name | lower }}"
+                  data-dish-id="{{ dish.id }}"
+                  data-dish-title="{{ dish.name }}"
+                  data-dish-desc="{{ dish.description }}"
+                  data-dish-category="{{ dish.category }}"
+                  data-dish-price="{{ dish.price }}"
+                  data-dish-food-type="{{ dish.food_type }}"
+                  data-dish-allergens="{{ dish.allergens }}"
+                  data-dish-prep="{{ dish.prep_time_minutes }}"
+                  data-dish-batch="{{ dish.prepared_batch_qty }}"
+                  data-dish-stock="{{ dish.stock_qty }}"
+                  data-dish-featured="{{ dish.is_featured }}">
+                <td>
+                  <div class="stock-row__title">
+                    <span class="food-dot food-dot--{{ dish.food_type }}"></span>
+                    <strong>{{ dish.name }}</strong>
+                    {% if dish.is_featured %}
+                      <span class="canteen-badge canteen-badge--mint">Popular</span>
+                    {% endif %}
+                  </div>
+                  <span class="stock-row__sub">{{ dish.description }} ({{ dish.prep_time_minutes }}m prep)</span>
+                </td>
+
+                <td>{{ dish.category }}</td>
+
+                <td class="num-cell">&#8377;{{ "%.0f"|format(dish.price) }}</td>
+
+                <td>
+                  <input class="canteen-input canteen-input--num js-batch-input"
+                         type="number"
+                         min="0"
+                         max="2000"
+                         value="{{ dish.prepared_batch_qty }}"
+                         data-item-id="{{ dish.id }}"
+                         aria-label="Prepared batch quantity for {{ dish.name }}">
+                </td>
+
+                <td class="num-cell">
+                  <span class="canteen-badge canteen-badge--mint">{{ dish.sold_today }} sold</span>
+                </td>
+
+                <td>
+                  <input class="canteen-input canteen-input--num js-stock-input"
+                         type="number"
+                         min="0"
+                         max="2000"
+                         value="{{ dish.stock_qty }}"
+                         data-item-id="{{ dish.id }}"
+                         aria-label="Live stock quantity for {{ dish.name }}">
+                </td>
+
+                <td class="js-status-cell">
+                  {% if sold_out %}
+                    <span class="canteen-badge canteen-badge--error">Sold Out</span>
+                  {% elif low_stock %}
+                    <span class="canteen-badge canteen-badge--warning">Low Stock (&le;{{ dish.stock_qty }})</span>
+                  {% else %}
+                    <span class="canteen-badge canteen-badge--success">Available</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div class="inline-qty-group">
+                    <button class="canteen-btn canteen-btn--primary canteen-btn--sm js-save-stock-btn"
+                            type="button"
+                            data-item-id="{{ dish.id }}">
+                      <span>Save Qty</span>
+                    </button>
+
+                    <button class="canteen-btn canteen-btn--sm {% if sold_out %}canteen-btn--outline{% else %}canteen-btn--danger-outline{% endif %} js-toggle-soldout-btn"
+                            type="button"
+                            data-item-id="{{ dish.id }}">
+                      <span>{% if sold_out %}Restock{% else %}Sold Out{% endif %}</span>
+                    </button>
+
+                    {% if is_manager %}
+                      <button class="canteen-btn canteen-btn--outline canteen-btn--sm js-edit-dish-btn"
+                              type="button"
+                              data-item-id="{{ dish.id }}">
+                        <span>Edit</span>
+                      </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    {# ---------- Manager-Only Add / Edit Dish Modal ---------- #}
+    {% if is_manager %}
+      <div class="canteen-modal-backdrop" id="dish-modal-backdrop" hidden>
+        <div class="canteen-modal" role="dialog" aria-modal="true" aria-labelledby="dish-modal-title">
+          <header class="canteen-modal__header">
+            <h2 class="canteen-modal__title" id="dish-modal-title">Add New Menu Dish</h2>
+            <button class="canteen-icon-btn" id="close-dish-modal-btn" type="button" aria-label="Close modal">
+              <i data-lucide="x"></i>
+            </button>
+          </header>
+
+          <form id="manager-dish-form">
+            <div class="canteen-modal__body canteen-form-grid">
+              <input type="hidden" id="dish-id-field" name="id" value="">
+
+              <div class="canteen-field canteen-field--full">
+                <label class="canteen-label" for="dish-name-field">Dish Name</label>
+                <input class="canteen-input" id="dish-name-field" name="name" type="text" maxlength="100" required>
+              </div>
+
+              <div class="canteen-field canteen-field--full">
+                <label class="canteen-label" for="dish-desc-field">Short Description</label>
+                <input class="canteen-input" id="dish-desc-field" name="description" type="text" maxlength="255" required>
+              </div>
+
+              <div class="canteen-field">
+                <label class="canteen-label" for="dish-category-field">Category</label>
+                <select class="canteen-select" id="dish-category-field" name="category" required>
+                  {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="canteen-field">
+                <label class="canteen-label" for="dish-food-type-field">Dietary Type</label>
+                <select class="canteen-select" id="dish-food-type-field" name="food_type" required>
+                  <option value="veg">Veg</option>
+                  <option value="non_veg">Non-Veg</option>
+                  <option value="egg">Egg</option>
+                </select>
+              </div>
+
+              <div class="canteen-field">
+                <label class="canteen-label" for="dish-price-field">Price (&#8377;)</label>
+                <input class="canteen-input" id="dish-price-field" name="price" type="number" min="0" step="1" value="60" required>
+              </div>
+
+              <div class="canteen-field">
+                <label class="canteen-label" for="dish-prep-field">Prep Time (minutes)</label>
+                <input class="canteen-input" id="dish-prep-field" name="prep_time_minutes" type="number" min="1" max="60" value="10" required>
+              </div>
+
+              <div class="canteen-field">
+                <label class="canteen-label" for="dish-batch-field">Today's Prepared Batch Qty</label>
+                <input class="canteen-input" id="dish-batch-field" name="prepared_batch_qty" type="number" min="0" max="2000" value="30" required>
+              </div>
+
+              <div class="canteen-field">
+                <label class="canteen-label" for="dish-stock-field">Initial Live Stock Qty</label>
+                <input class="canteen-input" id="dish-stock-field" name="stock_qty" type="number" min="0" max="2000" value="30" required>
+              </div>
+
+              <div class="canteen-field canteen-field--full">
+                <label class="canteen-label" for="dish-allergens-field">Allergens (comma-separated, optional)</label>
+                <input class="canteen-input" id="dish-allergens-field" name="allergens" type="text" placeholder="e.g. Dairy, Gluten, Nuts">
+              </div>
+
+              <div class="canteen-field canteen-field--full">
+                <label class="canteen-label">
+                  <input type="checkbox" id="dish-featured-field" name="is_featured" value="1">
+                  <span>Highlight as a Popular / Featured campus dish</span>
+                </label>
+              </div>
+            </div>
+
+            <footer class="canteen-modal__footer">
+              <button class="canteen-btn canteen-btn--outline" id="cancel-dish-modal-btn" type="button">Cancel</button>
+              <button class="canteen-btn canteen-btn--primary" type="submit">Save Dish</button>
+            </footer>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+{% endblock %}

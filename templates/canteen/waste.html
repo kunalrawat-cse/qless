@@ -1,0 +1,201 @@
+{% extends "canteen_base.html" %}
+
+{% block title %}Shift Waste Entry - Qless Canteen{% endblock %}
+{% block canteen_heading %}Shift &amp; End-of-Day Waste Entry{% endblock %}
+
+{% block canteen_content %}
+  {% set total_portions = today_logs | sum(attribute='quantity_wasted') %}
+
+  <div id="canteen-waste-page" class="split-command">
+
+    {# ---------- LEFT 65%: Today's Logged Waste Table ---------- #}
+    <div class="split-command__left">
+
+      {% if uncollected_orders %}
+        <article class="canteen-card">
+          <header class="canteen-card__header">
+            <div class="canteen-card__title-group">
+              <h2 class="canteen-card__title">
+                <i data-lucide="alert-circle"></i>
+                <span>Flagged Uncollected Orders (&gt;30 Minutes)</span>
+              </h2>
+              <p class="canteen-card__subtitle">
+                These orders were prepared but not collected • Log them under reason "Uncollected" if discarded
+              </p>
+            </div>
+          </header>
+          <div class="canteen-card__body">
+            <div class="alert-list">
+              {% for uo in uncollected_orders %}
+                <div class="alert-item alert-item--urgent">
+                  <span class="alert-item__title">
+                    Order #{{ uo.id }} (OTP {{ uo.pickup_otp }}) — {{ uo.student_name }}
+                  </span>
+                  <span class="alert-item__detail">Items: {{ uo.items_summary }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </article>
+      {% endif %}
+
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="clipboard-list"></i>
+              <span>Today's Waste Log ({{ today_logs | length }} entries • {{ total_portions }} portions)</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Feeds directly into Phase 7 Waste by Dish, Reason Breakdown &amp; Prepared vs. Sold charts
+            </p>
+          </div>
+        </header>
+
+        <div class="canteen-table-wrap">
+          {% if today_logs %}
+            <table class="canteen-table" id="waste-logs-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Dish</th>
+                  <th>Portions Wasted</th>
+                  <th>Weight (kg)</th>
+                  <th>Reason</th>
+                  <th>Notes</th>
+                  <th>Logged By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for log in today_logs %}
+                  <tr>
+                    <td class="num-cell">
+                      {{ log.created_at.strftime('%I:%M %p').lstrip('0') if log.created_at else 'Today' }}
+                    </td>
+                    <td>
+                      <strong>{{ log.dish_name }}</strong>
+                      <div class="stock-row__sub">{{ log.category }}</div>
+                    </td>
+                    <td class="num-cell">{{ log.quantity_wasted }} portions</td>
+                    <td class="num-cell">
+                      {% if log.weight_kg is not none %}
+                        {{ "%.2f"|format(log.weight_kg) }} kg
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if log.reason == 'overproduction' %}
+                        <span class="canteen-badge canteen-badge--warning">Overproduction</span>
+                      {% elif log.reason == 'spoilage' %}
+                        <span class="canteen-badge canteen-badge--error">Spoilage</span>
+                      {% else %}
+                        <span class="canteen-badge canteen-badge--urgent">Uncollected</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ log.notes or '—' }}</td>
+                    <td>{{ log.logged_by_name or 'Staff' }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="canteen-empty">
+              <i data-lucide="leaf"></i>
+              <h3 class="canteen-empty__title">No food waste logged today</h3>
+              <p class="canteen-empty__text">
+                Use the form on the right at the end of each shift to record unsold, spoiled, or uncollected portions.
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+    </div>
+
+    {# ---------- RIGHT 35%: Fast Shift Waste Entry Form ---------- #}
+    <div class="split-command__right">
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="trash-2"></i>
+              <span>Log Shift Waste</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Takes under 10 seconds • Select dish, portions &amp; reason
+            </p>
+          </div>
+        </header>
+
+        <div class="canteen-card__body">
+          <form id="waste-entry-form" class="canteen-form-grid">
+            <input type="hidden" name="waste_date" value="{{ today_iso }}">
+
+            <div class="canteen-field canteen-field--full">
+              <label class="canteen-label" for="waste-dish-select">Menu Dish</label>
+              <select class="canteen-select" id="waste-dish-select" name="menu_item_id" required>
+                <option value="">-- Choose a dish --</option>
+                {% for dish in dishes %}
+                  <option value="{{ dish.id }}">
+                    {{ dish.name }} ({{ dish.category }} • Batch: {{ dish.prepared_batch_qty }}, Left: {{ dish.stock_qty }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="canteen-field">
+              <label class="canteen-label" for="waste-qty-input">Portions Wasted</label>
+              <input class="canteen-input"
+                     id="waste-qty-input"
+                     name="quantity_wasted"
+                     type="number"
+                     min="1"
+                     max="1000"
+                     placeholder="e.g. 6"
+                     required>
+            </div>
+
+            <div class="canteen-field">
+              <label class="canteen-label" for="waste-weight-input">Est. Weight (kg, optional)</label>
+              <input class="canteen-input"
+                     id="waste-weight-input"
+                     name="weight_kg"
+                     type="number"
+                     min="0"
+                     max="500"
+                     step="0.05"
+                     placeholder="e.g. 1.50">
+            </div>
+
+            <div class="canteen-field canteen-field--full">
+              <label class="canteen-label" for="waste-reason-select">Primary Reason</label>
+              <select class="canteen-select" id="waste-reason-select" name="reason" required>
+                <option value="overproduction">Overproduction (cooked more than ordered)</option>
+                <option value="uncollected">Uncollected (student did not pick up)</option>
+                <option value="spoilage">Spoilage / Kitchen prep loss</option>
+              </select>
+            </div>
+
+            <div class="canteen-field canteen-field--full">
+              <label class="canteen-label" for="waste-notes-input">Shift Notes (optional)</label>
+              <input class="canteen-input"
+                     id="waste-notes-input"
+                     name="notes"
+                     type="text"
+                     maxlength="255"
+                     placeholder="e.g. Afternoon rain slowed walk-in traffic">
+            </div>
+
+            <div class="canteen-field canteen-field--full">
+              <button class="canteen-btn canteen-btn--primary canteen-btn--full" id="waste-submit-btn" type="submit">
+                <i data-lucide="plus-circle"></i>
+                <span>Save Waste Entry</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </article>
+    </div>
+
+  </div>
+{% endblock %}

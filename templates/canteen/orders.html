@@ -1,0 +1,178 @@
+{% extends "canteen_base.html" %}
+
+{% block title %}Live Orders & Kitchen Queue - Qless Canteen{% endblock %}
+{% block canteen_heading %}Live Orders &amp; Kitchen Queue{% endblock %}
+
+{% block canteen_content %}
+  <div id="canteen-orders-page" data-status-filter="{{ queue.status_filter }}">
+
+    {# ---------- Filter Tabs & Quick Actions Toolbar ---------- #}
+    <section class="canteen-toolbar" aria-label="Order status filters">
+      <nav class="filter-tabs" aria-label="Filter orders by status">
+        <a class="filter-tab {% if queue.status_filter == 'all' %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.live_orders', status='all') }}"
+           data-filter="all">
+          <span>Active Queue</span>
+          <span class="filter-tab__count" id="count-all">{{ queue.counts.all }}</span>
+        </a>
+
+        <a class="filter-tab {% if queue.status_filter == 'confirmed' %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.live_orders', status='confirmed') }}"
+           data-filter="confirmed">
+          <span>Confirmed</span>
+          <span class="filter-tab__count" id="count-confirmed">{{ queue.counts.confirmed }}</span>
+        </a>
+
+        <a class="filter-tab {% if queue.status_filter == 'preparing' %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.live_orders', status='preparing') }}"
+           data-filter="preparing">
+          <span>Preparing</span>
+          <span class="filter-tab__count" id="count-preparing">{{ queue.counts.preparing }}</span>
+        </a>
+
+        <a class="filter-tab {% if queue.status_filter == 'ready' %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.live_orders', status='ready') }}"
+           data-filter="ready">
+          <span>Ready for Pickup</span>
+          <span class="filter-tab__count" id="count-ready">{{ queue.counts.ready }}</span>
+        </a>
+
+        <a class="filter-tab {% if queue.status_filter == 'collected' %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.live_orders', status='collected') }}"
+           data-filter="collected">
+          <span>Collected Today</span>
+          <span class="filter-tab__count" id="count-collected">{{ queue.counts.collected }}</span>
+        </a>
+      </nav>
+
+      <div class="prep-row__actions">
+        <a class="canteen-btn canteen-btn--outline canteen-btn--sm" href="{{ url_for('canteen.pickup_queue') }}">
+          <i data-lucide="qr-code"></i>
+          <span>Open QR / OTP Counter</span>
+        </a>
+      </div>
+    </section>
+
+    {# ---------- Slot-Grouped Orders List ---------- #}
+    <article class="canteen-card">
+      <header class="canteen-card__header">
+        <div class="canteen-card__title-group">
+          <h2 class="canteen-card__title">
+            <i data-lucide="flame"></i>
+            <span>Slot-Grouped Kitchen Queue</span>
+          </h2>
+          <p class="canteen-card__subtitle">
+            Orders are grouped by 15-minute pickup window • Auto-refreshes every {{ config.POLL_INTERVAL_SECONDS }} seconds
+          </p>
+        </div>
+      </header>
+
+      <div class="canteen-card__body" id="live-orders-container">
+        {% if queue.slot_groups %}
+          <div class="slot-group-list">
+            {% for slot in queue.slot_groups %}
+              <section class="slot-group">
+                <header class="slot-group__bar">
+                  <div class="slot-group__time">
+                    <i data-lucide="clock"></i>
+                    <span>{{ slot.slot_label }}</span>
+                  </div>
+                  <span class="canteen-badge canteen-badge--mint">
+                    {{ slot.orders | length }} order(s) in view • Cap {{ slot.capacity }}
+                  </span>
+                </header>
+
+                <div class="slot-group__orders">
+                  {% for order in slot.orders %}
+                    <div class="prep-row {% if order.is_uncollected %}prep-row--uncollected{% endif %}"
+                         data-order-id="{{ order.id }}">
+                      <div class="prep-row__id-col">
+                        <span class="prep-row__order-num">Order #{{ order.id }}</span>
+                        <span class="prep-row__otp">OTP {{ order.pickup_otp }}</span>
+                      </div>
+
+                      <div class="prep-row__details">
+                        <div class="prep-row__dishes">
+                          {% for item in order['items'] %}
+                            <span class="dish-pill">
+                              <span class="food-dot food-dot--{{ item.food_type }}"></span>
+                              <span class="dish-pill__qty">{{ item.quantity }}&times;</span>
+                              <span>{{ item.name }}</span>
+                            </span>
+                          {% endfor %}
+                        </div>
+
+                        <div class="prep-row__meta">
+                          <span><strong>{{ order.student_name }}</strong> ({{ order.campus_id }})</span>
+                          <span>•</span>
+                          <span>{{ order.payment_method_label }} (&#8377;{{ "%.0f"|format(order.total_amount) }})</span>
+                          <span>•</span>
+                          <span>Placed {{ order.created_label }}</span>
+                          <span>•</span>
+                          {% if order.status == 'confirmed' %}
+                            <span class="canteen-badge canteen-badge--warning">Confirmed</span>
+                          {% elif order.status == 'preparing' %}
+                            <span class="canteen-badge canteen-badge--mint">Preparing</span>
+                          {% elif order.status == 'ready' %}
+                            <span class="canteen-badge canteen-badge--success">Ready for Pickup</span>
+                          {% elif order.status == 'collected' %}
+                            <span class="canteen-badge canteen-badge--forest">Collected</span>
+                          {% endif %}
+
+                          {% if order.is_uncollected %}
+                            <span class="canteen-badge canteen-badge--urgent">
+                              Uncollected &gt;30m ({{ order.minutes_since_ready }}m)
+                            </span>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="prep-row__actions">
+                        {% if order.status == 'confirmed' %}
+                          <button class="canteen-btn canteen-btn--primary js-order-status-btn"
+                                  type="button"
+                                  data-order-id="{{ order.id }}"
+                                  data-next-status="preparing">
+                            <i data-lucide="play"></i>
+                            <span>Start Prep</span>
+                          </button>
+                        {% elif order.status == 'preparing' %}
+                          <button class="canteen-btn canteen-btn--leaf js-order-status-btn"
+                                  type="button"
+                                  data-order-id="{{ order.id }}"
+                                  data-next-status="ready">
+                            <i data-lucide="check-circle-2"></i>
+                            <span>Mark Ready</span>
+                          </button>
+                        {% elif order.status == 'ready' %}
+                          <button class="canteen-btn canteen-btn--outline js-order-status-btn"
+                                  type="button"
+                                  data-order-id="{{ order.id }}"
+                                  data-next-status="collected">
+                            <i data-lucide="package-check"></i>
+                            <span>Mark Collected</span>
+                          </button>
+                        {% else %}
+                          <span class="canteen-badge canteen-badge--mint">Handed Over</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </section>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="canteen-empty">
+            <i data-lucide="inbox"></i>
+            <h3 class="canteen-empty__title">No orders in this filter</h3>
+            <p class="canteen-empty__text">
+              Switch tabs above or wait for incoming student orders. This queue refreshes every 15 seconds.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    </article>
+
+  </div>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends "canteen_base.html" %}
+
+{% block title %}Pickup Queue & Verification - Qless Canteen{% endblock %}
+{% block canteen_heading %}Pickup Queue — QR &amp; 4-Digit OTP Verification{% endblock %}
+
+{% block canteen_content %}
+  <div id="canteen-pickup-page" class="split-command">
+
+    {# ---------- LEFT 65%: Instant OTP / QR Verification + Ready Queue ---------- #}
+    <div class="split-command__left">
+
+      {# Card 1: Fast Counter Verification Box #}
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="qr-code"></i>
+              <span>Verify Student Pickup (4-Digit OTP or QR Token)</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Type the student's 4-digit OTP (e.g. 4821), scan their QR payload, or enter Order #id
+            </p>
+          </div>
+        </header>
+
+        <div class="canteen-card__body">
+          <form id="pickup-verify-form" class="verify-box" autocomplete="off">
+            <input class="canteen-input canteen-input--otp"
+                   id="pickup-code-input"
+                   name="code"
+                   type="text"
+                   placeholder="Enter 4-digit OTP, QR token, or #Order ID"
+                   aria-label="4-digit Pickup OTP or QR token"
+                   required>
+            <button class="canteen-btn canteen-btn--primary" id="pickup-lookup-btn" type="submit">
+              <i data-lucide="search"></i>
+              <span>Verify Code</span>
+            </button>
+          </form>
+
+          <div id="pickup-verify-result" hidden></div>
+        </div>
+      </article>
+
+      {# Card 2: Currently Ready for Pickup Orders #}
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="package-check"></i>
+              <span>Ready at Counter ({{ ready_orders | length }})</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Meals marked Ready for Pickup • Tap "Confirm Handover" once the student shows their OTP
+            </p>
+          </div>
+        </header>
+
+        <div class="canteen-card__body" id="ready-pickup-list">
+          {% if ready_orders %}
+            <div class="slot-group__orders">
+              {% for order in ready_orders %}
+                <div class="prep-row {% if order.is_uncollected %}prep-row--uncollected{% endif %}"
+                     data-ready-order-id="{{ order.id }}">
+                  <div class="prep-row__id-col">
+                    <span class="prep-row__order-num">Order #{{ order.id }}</span>
+                    <span class="prep-row__otp">OTP {{ order.pickup_otp }}</span>
+                  </div>
+
+                  <div class="prep-row__details">
+                    <div class="prep-row__dishes">
+                      {% for item in order['items'] %}
+                        <span class="dish-pill">
+                          <span class="food-dot food-dot--{{ item.food_type }}"></span>
+                          <span class="dish-pill__qty">{{ item.quantity }}&times;</span>
+                          <span>{{ item.name }}</span>
+                        </span>
+                      {% endfor %}
+                    </div>
+
+                    <div class="prep-row__meta">
+                      <span><strong>{{ order.student_name }}</strong> ({{ order.campus_id }})</span>
+                      <span>•</span>
+                      <span>Slot {{ order.slot_label }}</span>
+                      <span>•</span>
+                      <span>{{ order.payment_method_label }} (&#8377;{{ "%.0f"|format(order.total_amount) }})</span>
+                      {% if order.is_uncollected %}
+                        <span class="canteen-badge canteen-badge--urgent">
+                          Uncollected &gt;30m ({{ order.minutes_since_ready }}m)
+                        </span>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="prep-row__actions">
+                    <button class="canteen-btn canteen-btn--leaf js-collect-order-btn"
+                            type="button"
+                            data-order-id="{{ order.id }}">
+                      <i data-lucide="check-check"></i>
+                      <span>Confirm Handover (Collected)</span>
+                    </button>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="canteen-empty">
+              <i data-lucide="package"></i>
+              <h3 class="canteen-empty__title">No orders waiting at the counter</h3>
+              <p class="canteen-empty__text">
+                When kitchen staff click "Mark Ready", orders appear here for instant counter handover.
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+
+    </div>
+
+    {# ---------- RIGHT 35%: Recent Collected Handovers ---------- #}
+    <div class="split-command__right">
+      <article class="canteen-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="history"></i>
+              <span>Recent Handovers Today</span>
+            </h2>
+            <p class="canteen-card__subtitle">
+              Last {{ recent_collected | length }} orders verified and collected
+            </p>
+          </div>
+        </header>
+
+        <div class="canteen-card__body" id="recent-collected-list">
+          {% if recent_collected %}
+            <div class="batch-list">
+              {% for order in recent_collected %}
+                <div class="batch-item">
+                  <div class="stock-row__info">
+                    <span class="stock-row__title">
+                      Order #{{ order.id }} • {{ order.student_name }}
+                    </span>
+                    <span class="stock-row__sub">
+                      OTP {{ order.pickup_otp }} • {{ order.total_portions }} portion(s) • &#8377;{{ "%.0f"|format(order.total_amount) }}
+                    </span>
+                  </div>
+                  <span class="canteen-badge canteen-badge--success">Collected</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="canteen-empty">
+              <p class="canteen-empty__text">No orders have been handed over yet today.</p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+    </div>
+
+  </div>
+{% endblock %}
