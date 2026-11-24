@@ -1,0 +1,359 @@
+{% extends "canteen_base.html" %}
+
+{% block title %}Demand & Waste Analytics - Qless Canteen{% endblock %}
+{% block canteen_heading %}Post-Rush Demand &amp; Food-Waste Analytics ({{ report.window_label }}){% endblock %}
+
+{% block canteen_content %}
+  <div id="canteen-analytics-page" data-days="{{ report.days }}">
+
+    {# ---------- Date-Range Filter Tabs & Export Buttons ---------- #}
+    <section class="canteen-toolbar" aria-label="Analytics time range and exports">
+      <nav class="filter-tabs" aria-label="Select date range">
+        <a class="filter-tab {% if report.days == 1 %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.analytics', days=1) }}">
+          <span>Today</span>
+        </a>
+        <a class="filter-tab {% if report.days == 7 %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.analytics', days=7) }}">
+          <span>Last 7 Days</span>
+        </a>
+        <a class="filter-tab {% if report.days == 14 %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.analytics', days=14) }}">
+          <span>Last 14 Days</span>
+        </a>
+        <a class="filter-tab {% if report.days == 30 %}filter-tab--active{% endif %}"
+           href="{{ url_for('canteen.analytics', days=30) }}">
+          <span>Last 30 Days</span>
+        </a>
+      </nav>
+
+      <div class="prep-row__actions">
+        <a class="canteen-btn canteen-btn--outline canteen-btn--sm"
+           href="{{ url_for('canteen.export_orders_report', days=report.days) }}">
+          <i data-lucide="download"></i>
+          <span>Orders CSV</span>
+        </a>
+        <a class="canteen-btn canteen-btn--outline canteen-btn--sm"
+           href="{{ url_for('canteen.export_waste_report', days=report.days) }}">
+          <i data-lucide="file-spreadsheet"></i>
+          <span>Waste Logs CSV</span>
+        </a>
+        <a class="canteen-btn canteen-btn--primary canteen-btn--sm"
+           href="{{ url_for('canteen.export_matplotlib_png', days=report.days) }}">
+          <i data-lucide="image"></i>
+          <span>Download Report Chart (PNG)</span>
+        </a>
+      </div>
+    </section>
+
+    {# ---------- Chart #8 / Top Summary: 4 Post-Rush Revenue & Waste KPI Cards ---------- #}
+    <section class="kpi-grid" aria-label="Post-rush summary metrics">
+      <article class="kpi-card">
+        <div class="kpi-card__top">
+          <span class="kpi-card__label">Revenue in Window</span>
+          <span class="kpi-card__icon"><i data-lucide="indian-rupee"></i></span>
+        </div>
+        <div class="kpi-card__value">&#8377;{{ "%.0f"|format(report.kpis.total_revenue) }}</div>
+        <div class="kpi-card__meta">
+          <span>{{ report.kpis.collected_orders }} collected / {{ report.kpis.total_orders }} orders</span>
+          <span class="canteen-badge canteen-badge--success">Paid &amp; Counter</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <div class="kpi-card__top">
+          <span class="kpi-card__label">Total Portions Sold</span>
+          <span class="kpi-card__icon"><i data-lucide="utensils"></i></span>
+        </div>
+        <div class="kpi-card__value">{{ report.kpis.total_portions_sold }}</div>
+        <div class="kpi-card__meta">
+          <span>Across {{ report.days }}-day window</span>
+          <span class="canteen-badge canteen-badge--mint">Pre-ordered</span>
+        </div>
+      </article>
+
+      <article class="kpi-card {% if report.kpis.waste_rate_percent >= 15 %}kpi-card--alert{% endif %}">
+        <div class="kpi-card__top">
+          <span class="kpi-card__label">Food Waste Logged</span>
+          <span class="kpi-card__icon kpi-card__icon--warning"><i data-lucide="trash-2"></i></span>
+        </div>
+        <div class="kpi-card__value">{{ report.kpis.total_portions_wasted }} portions</div>
+        <div class="kpi-card__meta">
+          <span>{{ "%.2f"|format(report.kpis.total_waste_kg) }} kg total weight</span>
+          <span class="canteen-badge {% if report.kpis.waste_rate_percent >= 15 %}canteen-badge--warning{% else %}canteen-badge--success{% endif %}">
+            {{ report.kpis.waste_rate_percent }}% waste rate
+          </span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <div class="kpi-card__top">
+          <span class="kpi-card__label">Student Meal Rating</span>
+          <span class="kpi-card__icon"><i data-lucide="star"></i></span>
+        </div>
+        <div class="kpi-card__value">
+          {% if report.kpis.rating_count > 0 %}
+            {{ "%.1f"|format(report.kpis.avg_rating) }} / 5
+          {% else %}
+            —
+          {% endif %}
+        </div>
+        <div class="kpi-card__meta">
+          <span>From {{ report.kpis.rating_count }} post-pickup rating(s)</span>
+          <span class="canteen-badge canteen-badge--mint">1-Tap Feedback</span>
+        </div>
+      </article>
+    </section>
+
+    {# ---------- 8 Operational Charts Grid (Analyse Later) ---------- #}
+    <section class="charts-grid" aria-label="8 operational demand and waste charts">
+
+      {# Chart 1: Orders by 15-Minute Pickup Slot #}
+      <article class="canteen-card chart-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="clock"></i>
+              <span>1. Orders by 15-Minute Pickup Slot</span>
+            </h2>
+            <p class="canteen-card__subtitle">Identifies peak rush-hour pickup windows for kitchen staffing</p>
+          </div>
+        </header>
+        <div class="canteen-card__body">
+          <div class="chart-box">
+            <canvas id="chart-orders-by-slot" aria-label="Orders by 15-minute pickup slot"></canvas>
+          </div>
+        </div>
+      </article>
+
+      {# Chart 2: Top-Selling Dishes #}
+      <article class="canteen-card chart-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="flame"></i>
+              <span>2. Top-Selling Dishes (Portions Sold)</span>
+            </h2>
+            <p class="canteen-card__subtitle">Most popular campus dishes ranked by portions ordered</p>
+          </div>
+        </header>
+        <div class="canteen-card__body">
+          <div class="chart-box">
+            <canvas id="chart-top-dishes" aria-label="Top selling dishes"></canvas>
+          </div>
+        </div>
+      </article>
+
+      {# Chart 3: Prepared vs. Sold by Item #}
+      <article class="canteen-card chart-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="scale"></i>
+              <span>3. Prepared vs. Sold by Item</span>
+            </h2>
+            <p class="canteen-card__subtitle">Compares kitchen prepared batch quantities against actual student sales</p>
+          </div>
+        </header>
+        <div class="canteen-card__body">
+          <div class="chart-box">
+            <canvas id="chart-prepared-vs-sold" aria-label="Prepared versus sold portions by item"></canvas>
+          </div>
+        </div>
+      </article>
+
+      {# Chart 4: Daily Waste Trend #}
+      <article class="canteen-card chart-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="trending-down"></i>
+              <span>4. Daily Food-Waste Trend (Portions &amp; Kg)</span>
+            </h2>
+            <p class="canteen-card__subtitle">Tracks day-by-day waste reduction progress across shifts</p>
+          </div>
+        </header>
+        <div class="canteen-card__body">
+          <div class="chart-box">
+            <canvas id="chart-daily-waste" aria-label="Daily food waste trend"></canvas>
+          </div>
+        </div>
+      </article>
+
+      {# Chart 5: Waste by Dish #}
+      <article class="canteen-card chart-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="bar-chart-2"></i>
+              <span>5. Food Waste by Dish</span>
+            </h2>
+            <p class="canteen-card__subtitle">Highlights dishes that need smaller batch sizes next week</p>
+          </div>
+        </header>
+        <div class="canteen-card__body">
+          <div class="chart-box">
+            <canvas id="chart-waste-by-dish" aria-label="Food waste by dish"></canvas>
+          </div>
+        </div>
+      </article>
+
+      {# Chart 6: Waste Reason Breakdown #}
+      <article class="canteen-card chart-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="pie-chart"></i>
+              <span>6. Waste Reason Breakdown</span>
+            </h2>
+            <p class="canteen-card__subtitle">Overproduction vs. Spoilage vs. Uncollected orders</p>
+          </div>
+        </header>
+        <div class="canteen-card__body">
+          <div class="chart-box">
+            <canvas id="chart-waste-reasons" aria-label="Waste reason breakdown"></canvas>
+          </div>
+        </div>
+      </article>
+
+      {# Chart 7: Slot Utilization Heatmap #}
+      <article class="canteen-card chart-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="grid"></i>
+              <span>7. 15-Minute Slot Utilization Heatmap</span>
+            </h2>
+            <p class="canteen-card__subtitle">Capacity utilization (%) across active 15-minute pickup slots</p>
+          </div>
+        </header>
+        <div class="canteen-card__body">
+          {% if report.charts.slot_heatmap %}
+            <div class="heatmap-grid">
+              {% for cell in report.charts.slot_heatmap %}
+                <div class="heatmap-cell heatmap-cell--{{ cell.tone }}">
+                  <span class="heatmap-cell__time">{{ cell.slot_label }}</span>
+                  <span class="heatmap-cell__pct">{{ cell.load_percent }}% load</span>
+                  <span class="heatmap-cell__meta">{{ cell.booked }} / {{ cell.capacity }} orders</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="canteen-empty">
+              <p class="canteen-empty__text">No slot bookings recorded in this window.</p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+
+      {# Chart 8: Category Sold vs. Wasted Summary #}
+      <article class="canteen-card chart-card">
+        <header class="canteen-card__header">
+          <div class="canteen-card__title-group">
+            <h2 class="canteen-card__title">
+              <i data-lucide="layers"></i>
+              <span>8. Category Demand vs. Waste Summary</span>
+            </h2>
+            <p class="canteen-card__subtitle">Portions sold vs. portions wasted across menu categories</p>
+          </div>
+        </header>
+        <div class="canteen-card__body">
+          <div class="chart-box">
+            <canvas id="chart-category-summary" aria-label="Category demand versus waste summary"></canvas>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    {# ---------- Historical Orders & Student Feedback Table ---------- #}
+    <article class="canteen-card">
+      <header class="canteen-card__header">
+        <div class="canteen-card__title-group">
+          <h2 class="canteen-card__title">
+            <i data-lucide="receipt"></i>
+            <span>Historical Orders &amp; Student Feedback ({{ report.historical_orders | length }} shown)</span>
+          </h2>
+          <p class="canteen-card__subtitle">
+            Complete audit log of recent orders, pickup slots, payment methods, and 1-tap ratings
+          </p>
+        </div>
+      </header>
+
+      <div class="canteen-table-wrap">
+        {% if report.historical_orders %}
+          <table class="canteen-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Date &amp; 15-Min Slot</th>
+                <th>Student</th>
+                <th>Payment</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Student Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in report.historical_orders %}
+                <tr>
+                  <td class="num-cell">
+                    <strong>#{{ order.id }}</strong>
+                    <div class="stock-row__sub">OTP {{ order.pickup_otp }}</div>
+                  </td>
+                  <td class="num-cell">
+                    <strong>{{ order.slot_label }}</strong>
+                    <div class="stock-row__sub">{{ order.date_label }}</div>
+                  </td>
+                  <td>
+                    <strong>{{ order.student_name }}</strong>
+                    <div class="stock-row__sub">{{ order.campus_id }}</div>
+                  </td>
+                  <td>{{ order.payment_method_label }}</td>
+                  <td class="num-cell">&#8377;{{ "%.0f"|format(order.total_amount) }}</td>
+                  <td>
+                    {% if order.status == 'collected' %}
+                      <span class="canteen-badge canteen-badge--success">Collected</span>
+                    {% elif order.status == 'cancelled' %}
+                      <span class="canteen-badge canteen-badge--error">Cancelled</span>
+                    {% elif order.status == 'ready' %}
+                      <span class="canteen-badge canteen-badge--warning">Ready</span>
+                    {% else %}
+                      <span class="canteen-badge canteen-badge--mint">{{ order.status | capitalize }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if order.rating %}
+                      <span class="canteen-badge canteen-badge--forest">{{ order.rating }} &#9733;</span>
+                      {% if order.comment %}
+                        <div class="stock-row__sub">{{ order.comment }}</div>
+                      {% endif %}
+                    {% else %}
+                      <span class="stock-row__sub">No rating</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="canteen-empty">
+            <i data-lucide="inbox"></i>
+            <h3 class="canteen-empty__title">No historical orders in this range</h3>
+            <p class="canteen-empty__text">Switch to Last 14 Days or Last 30 Days above to view older records.</p>
+          </div>
+        {% endif %}
+      </div>
+    </article>
+
+    {# Safe JSON payload consumed by static/js/analytics.js (zero VS Code linter warnings) #}
+    <script id="analytics-payload-json" type="application/json">
+      {{ report.charts | tojson }}
+    </script>
+  </div>
+{% endblock %}
+
+{% block canteen_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

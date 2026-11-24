@@ -24,11 +24,17 @@ JSON API (under /api/canteen/... so access.py returns JSON 401/403 on fetch()):
 
 from datetime import datetime, timedelta
 
-from flask import Blueprint, g, jsonify, render_template, render_template_string, request
+from flask import Blueprint, Response, g, jsonify, render_template, render_template_string, request
 from jinja2 import TemplateNotFound
 from pymysql.err import IntegrityError
 from werkzeug.security import generate_password_hash
 
+from analytics.reports import (
+    build_analytics_payload,
+    export_orders_csv,
+    export_waste_csv,
+    generate_matplotlib_report_png,
+)
 from config import Config
 from db import execute, fetch_all, fetch_one, get_connection
 from routes.access import role_required
@@ -731,16 +737,54 @@ def waste_entry():
 @canteen_bp.route("/canteen/analytics")
 @role_required("staff", "manager")
 def analytics():
-    return render_canteen_page(
-        "canteen/analytics.html",
-        page_title="Demand & Waste Analytics + Reports",
-        page_note=(
-            "Phase 7 adds the 8 post-rush operational charts (Orders by 15-Minute Slot, "
-            "Top-Selling Dishes, Prepared vs. Sold by Item, Daily Waste Trend, Waste by Dish, "
-            "Waste Reason Breakdown, Slot Utilization Heatmap, and Revenue & Waste KPI Summary) "
-            "plus CSV and static report exports."
-        ),
-        phase_label="Phase 7 — Post-Rush Analytics",
+    days = request.args.get("days", "14")
+    report_data = build_analytics_payload(days)
+    return render_template("canteen/analytics.html", report=report_data)
+
+
+@canteen_bp.route("/api/canteen/analytics")
+@role_required("staff", "manager")
+def api_analytics():
+    days = request.args.get("days", "14")
+    return jsonify(build_analytics_payload(days))
+
+
+@canteen_bp.route("/canteen/analytics/export/orders.csv")
+@role_required("staff", "manager")
+def export_orders_report():
+    days = request.args.get("days", "14")
+    csv_text = export_orders_csv(days)
+    filename = f"qless_orders_{days}d.csv"
+    return Response(
+        csv_text,
+        mimetype="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@canteen_bp.route("/canteen/analytics/export/waste.csv")
+@role_required("staff", "manager")
+def export_waste_report():
+    days = request.args.get("days", "14")
+    csv_text = export_waste_csv(days)
+    filename = f"qless_waste_logs_{days}d.csv"
+    return Response(
+        csv_text,
+        mimetype="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@canteen_bp.route("/canteen/analytics/export/report.png")
+@role_required("staff", "manager")
+def export_matplotlib_png():
+    days = request.args.get("days", "14")
+    png_bytes = generate_matplotlib_report_png(days)
+    filename = f"qless_sustainability_report_{days}d.png"
+    return Response(
+        png_bytes,
+        mimetype="image/png",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 
