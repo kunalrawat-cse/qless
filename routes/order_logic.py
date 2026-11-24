@@ -19,6 +19,7 @@ from datetime import datetime, time, timedelta
 
 from config import Config
 from db import fetch_all, fetch_one, get_connection
+from menu_images import resolve_image_url
 
 
 class OrderError(Exception):
@@ -401,7 +402,7 @@ def build_order_payload(order_id, student_id):
 
     items = fetch_all(
         """
-        SELECT m.name, m.food_type, oi.quantity, oi.unit_price
+        SELECT m.name, m.food_type, m.image_url, oi.quantity, oi.unit_price
         FROM order_items oi
         JOIN menu_items m ON m.id = oi.menu_item_id
         WHERE oi.order_id = %s
@@ -431,6 +432,7 @@ def build_order_payload(order_id, student_id):
             {
                 "name": item["name"],
                 "food_type": item["food_type"],
+                "image_url": resolve_image_url(item["name"], item["image_url"]),
                 "quantity": item["quantity"],
                 "unit_price": float(item["unit_price"]),
             }

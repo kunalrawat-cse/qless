@@ -75,3 +75,12 @@ Stack: **Python Flask + MySQL (`PyMySQL`) + Jinja2 Templates + Vanilla JS (`15s 
    - Walk through the **4 Post-Rush KPIs** and the **8 Operational Charts** (*Orders by 15-Minute Slot*, *Top-Selling Dishes*, *Prepared vs. Sold by Item*, *Daily Food-Waste Trend*, *Food Waste by Dish*, *Waste Reason Breakdown*, *15-Minute Slot Utilization Heatmap*, and *Category Demand vs. Waste Summary*).
    - Click **`Orders CSV`**, **`Waste Logs CSV`**, and **`Download Report Chart (PNG)`** to demonstrate instant data and Matplotlib report exports.
 4. Open **`/canteen/settings`** (as **Canteen Manager**) to show 15-minute slot capacity controls and staff account creation.
+
+
+## Menu photos
+
+Dish photos live in `static/img/menu/` (600x400 JPEG, one per dish, named after the dish: `idli-sambar.jpg`).
+- Fresh installs: `sql/seed.sql` already sets `menu_items.image_url`.
+- Existing databases: run `sql/add_menu_images.sql` once (updates `image_url` by dish name, deletes nothing).
+- A dish with no `image_url`, or whose file fails to load, shows its category icon instead.
+- **Paneer Rice Bowl** has no photo yet. Add one as `static/img/menu/paneer-rice-bowl.jpg` and set its `image_url`.

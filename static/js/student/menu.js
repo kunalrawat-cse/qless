@@ -193,13 +193,25 @@ function renderGrid() {
 }
 
 function buildPhotoHtml(item) {
-    // No photos are stored yet, so dishes get a soft icon tile. Add an image_url to show a photo.
-    if (item.image_url) {
-        return `<img src="${escapeHtml(item.image_url)}" alt="" loading="lazy">`;
-    }
+    // A dish with a photo shows it; a dish without one (or whose file fails to load) shows its category icon.
     const icon = categoryIcons[item.category] || "utensils";
+    if (item.image_url) {
+        return `<img src="${escapeHtml(item.image_url)}" alt="" loading="lazy" decoding="async" width="600" height="400" data-fallback-icon="${icon}">`;
+    }
     return `<i data-lucide="${icon}"></i>`;
 }
+
+// If a photo is missing or broken, swap it for the category icon so the card never shows a broken image.
+document.addEventListener("error", function (event) {
+    const image = event.target;
+    if (!(image instanceof HTMLImageElement) || !image.dataset.fallbackIcon) {
+        return;
+    }
+    const holder = image.parentElement;
+    holder.classList.add("is-fallback");
+    holder.innerHTML = `<i data-lucide="${image.dataset.fallbackIcon}"></i>`;
+    drawIcons();
+}, true);
 
 function buildStockBadgeHtml(item) {
     // Shown only for "Sold out" and "5 or fewer left", as the blueprint says

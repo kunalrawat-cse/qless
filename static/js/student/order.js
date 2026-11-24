@@ -259,7 +259,10 @@ function renderSummary(order) {
     document.getElementById("summary-list").innerHTML = order.items.map(function (item) {
         return `
           <li class="summary-list__row">
-            <span>${foodDotHtml(item.food_type)} <span class="num">${item.quantity} ×</span> ${escapeHtml(item.name)}</span>
+            <span class="summary-list__dish">
+              ${item.image_url ? `<img class="summary-list__thumb" src="${escapeHtml(item.image_url)}" alt="" width="44" height="44" loading="lazy" onerror="this.remove()">` : ""}
+              <span>${foodDotHtml(item.food_type)} <span class="num">${item.quantity} ×</span> ${escapeHtml(item.name)}</span>
+            </span>
             <span class="num">${formatPrice(item.unit_price * item.quantity)}</span>
           </li>`;
     }).join("");

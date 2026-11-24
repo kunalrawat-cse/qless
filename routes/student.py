@@ -20,6 +20,7 @@ from flask import Blueprint, abort, current_app, g, jsonify, render_template, re
 
 from config import Config
 from db import fetch_all
+from menu_images import resolve_image_url
 from routes.access import role_required
 from routes.order_logic import (
     OrderError,
@@ -73,7 +74,7 @@ def build_menu_item(row, ratings):
         "food_type": row["food_type"],
         "allergens": [name.strip() for name in row["allergens"].split(",") if name.strip()],
         "prep_time_minutes": row["prep_time_minutes"],
-        "image_url": row["image_url"],
+        "image_url": resolve_image_url(row["name"], row["image_url"]),
         "stock_qty": row["stock_qty"],
         "is_featured": bool(row["is_featured"]),
         "available": is_available,

@@ -85,14 +85,24 @@
                   data-dish-stock="{{ dish.stock_qty }}"
                   data-dish-featured="{{ dish.is_featured }}">
                 <td>
-                  <div class="stock-row__title">
-                    <span class="food-dot food-dot--{{ dish.food_type }}"></span>
-                    <strong>{{ dish.name }}</strong>
-                    {% if dish.is_featured %}
-                      <span class="canteen-badge canteen-badge--mint">Popular</span>
+                  <div class="dish-cell">
+                    {% if dish.image_url %}
+                      <img class="dish-thumb" src="{{ dish.image_url }}" alt="" width="64" height="64" loading="lazy"
+                           onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'dish-thumb dish-thumb--empty'}))">
+                    {% else %}
+                      <span class="dish-thumb dish-thumb--empty" aria-hidden="true"></span>
                     {% endif %}
+                    <div>
+                      <div class="stock-row__title">
+                        <span class="food-dot food-dot--{{ dish.food_type }}"></span>
+                        <strong>{{ dish.name }}</strong>
+                        {% if dish.is_featured %}
+                          <span class="canteen-badge canteen-badge--mint">Popular</span>
+                        {% endif %}
+                      </div>
+                      <span class="stock-row__sub">{{ dish.description }} ({{ dish.prep_time_minutes }}m prep)</span>
+                    </div>
                   </div>
-                  <span class="stock-row__sub">{{ dish.description }} ({{ dish.prep_time_minutes }}m prep)</span>
                 </td>
 
                 <td>{{ dish.category }}</td>

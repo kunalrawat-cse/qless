@@ -802,6 +802,7 @@
 }
 
 .stock-row__info {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1304,7 +1305,7 @@
   }
 
   .split-command {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1442,4 +1443,111 @@
   .charts-grid {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* Dish thumbnails in the menu-management table */
+.dish-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dish-thumb {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-control);
+  object-fit: cover;
+  background: var(--color-mint);
+}
+
+.dish-thumb--empty {
+  display: inline-block;
+  border: 1px dashed var(--color-border-sage);
+}
+
+.dish-thumb--sm {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+
+.stock-row .dish-thumb--sm {
+  margin-right: calc(var(--space-1) * -1);
+}
+
+/* Hover feedback on dashboard cards and table rows */
+.kpi-card,
+.canteen-table tbody tr {
+  transition: box-shadow var(--speed-fast) ease, background-color var(--speed-fast) ease;
+}
+
+@media (hover: hover) {
+  .kpi-card:hover {
+    box-shadow: var(--shadow-raised);
+  }
+
+  .canteen-table tbody tr:hover {
+    background-color: var(--color-mint);
+  }
+}
+
+/* Dish column keeps a readable width in the menu table */
+.canteen-table td:first-child {
+  min-width: 260px;
+}
+
+/* ---------- Phones: tighter header, 2-up KPI cards ---------- */
+@media (max-width: 540px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .kpi-card {
+    padding: var(--space-3);
+  }
+
+  .kpi-card__value {
+    font-size: 1.75rem;
+  }
+
+  .kpi-card__icon {
+    display: none;
+  }
+
+  .canteen-topbar {
+    padding: var(--space-2) var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .canteen-topbar__title {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+
+  .canteen-topbar {
+    flex-wrap: wrap;
+  }
+
+  .canteen-topbar__left,
+  .canteen-topbar__right {
+    min-width: 0;
+  }
+
+  .canteen-topbar__right {
+    flex: 1 1 100%;
+    gap: var(--space-2);
+  }
+}
+
+.split-command__left,
+.split-command__right,
+.canteen-card {
+  min-width: 0;
+}
+
+.canteen-card__body {
+  overflow-x: auto;
 }

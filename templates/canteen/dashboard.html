@@ -253,6 +253,10 @@
             {% for item in dashboard.quick_stock_items[:7] %}
               <div class="stock-row {% if item.is_sold_out %}stock-row--sold-out{% endif %}"
                    data-item-id="{{ item.id }}">
+                {% if item.image_url %}
+                  <img class="dish-thumb dish-thumb--sm" src="{{ item.image_url }}" alt="" width="44" height="44" loading="lazy"
+                       onerror="this.style.display='none'">
+                {% endif %}
                 <div class="stock-row__info">
                   <div class="stock-row__title">
                     <span class="food-dot food-dot--{{ item.food_type }}"></span>

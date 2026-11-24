@@ -37,6 +37,7 @@ from analytics.reports import (
 )
 from config import Config
 from db import execute, fetch_all, fetch_one, get_connection
+from menu_images import resolve_image_url
 from routes.access import role_required
 from routes.auth import check_password_strength, is_valid_email
 from routes.order_logic import (
@@ -339,7 +340,7 @@ def build_dashboard_payload():
 
     menu_rows = fetch_all(
         """
-        SELECT id, name, category, price, food_type, stock_qty,
+        SELECT id, name, category, price, food_type, stock_qty, image_url,
                prepared_batch_qty, is_sold_out, is_featured
         FROM menu_items
         WHERE is_active = 1
@@ -360,6 +361,7 @@ def build_dashboard_payload():
             "id": item["id"],
             "name": item["name"],
             "category": item["category"],
+            "image_url": resolve_image_url(item["name"], item["image_url"]),
             "price": float(item["price"]),
             "food_type": item["food_type"],
             "stock_qty": int(item["stock_qty"]),
@@ -652,7 +654,7 @@ def menu_availability():
     dishes = fetch_all(
         """
         SELECT m.id, m.name, m.description, m.category, m.price, m.food_type,
-               m.allergens, m.prep_time_minutes, m.prepared_batch_qty, m.stock_qty,
+               m.allergens, m.prep_time_minutes, m.image_url, m.prepared_batch_qty, m.stock_qty,
                m.is_sold_out, m.is_featured, m.is_active,
                COALESCE(SUM(CASE WHEN o.id IS NOT NULL THEN oi.quantity ELSE 0 END), 0) AS sold_today
         FROM menu_items m
@@ -665,6 +667,9 @@ def menu_availability():
         """,
         (today,),
     )
+
+    for dish in dishes:
+        dish["image_url"] = resolve_image_url(dish["name"], dish["image_url"])
 
     return render_canteen_page(
         "canteen/menu_manage.html",
