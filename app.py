@@ -8,11 +8,10 @@ What happens on every request:
   4. stop_caching...      -> logged-in pages are never cached by the browser
 """
 
-from flask import Flask, g, jsonify, render_template, request, session
+from flask import Flask, g, render_template, request, session
 
 from config import Config
 from db import fetch_one
-from routes.access import role_required
 from routes.auth import auth_bp
 from routes.canteen import canteen_bp
 from routes.main import main_bp
@@ -45,7 +44,7 @@ def load_logged_in_user():
         return
 
     user = fetch_one(
-        "SELECT id, full_name, email, role, dietary_preference FROM users WHERE id = %s",
+        "SELECT id, full_name, email, campus_id, role, dietary_preference, created_at FROM users WHERE id = %s",
         (user_id,),
     )
 
@@ -97,33 +96,11 @@ for error_code in ERROR_MESSAGES:
     app.register_error_handler(error_code, show_error_page)
 
 
-# ---------- Utility pages ----------
+# ---------- Utility health endpoint ----------
 
 @app.route("/health")
 def health_check():
-    # A simple page to confirm the server is running
     return "Qless is running. Less Waiting. Less Waste. Better Campus."
-
-
-@app.route("/db-check")
-@role_required("manager")
-def database_check():
-    # Shows how many rows each table has. Managers only.
-    # (We will remove this page before the final demo.)
-    table_names = [
-        "users", "menu_items", "pickup_slots", "orders", "order_items",
-        "daily_batches", "waste_logs", "feedback",
-    ]
-    row_counts = {}
-
-    try:
-        for table_name in table_names:
-            row = fetch_one(f"SELECT COUNT(*) AS total FROM {table_name}")
-            row_counts[table_name] = row["total"]
-    except Exception as error:
-        return jsonify({"error": str(error)}), 500
-
-    return jsonify(row_counts)
 
 
 if __name__ == "__main__":

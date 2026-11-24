@@ -1,15 +1,116 @@
-{% extends "app_base.html" %}
+{% extends "canteen_base.html" if current_user.role in ('staff', 'manager') else "student_base.html" %}
 
-{% block title %}My account - Qless{% endblock %}
+{% block title %}My Account & Settings - Qless{% endblock %}
+{% block canteen_heading %}My Account &amp; Security Settings{% endblock %}
 
 {% block content %}
-  <h1 style="font-size: 2rem;">My account</h1>
-  <p class="text-soft">Any logged-in user can see this page.</p>
+  <div class="container" style="max-width: 820px; padding: var(--space-5) var(--space-4);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4);">
+      <div>
+        <h1 style="margin: 0; font-family: var(--font-heading); font-size: var(--text-h2); color: var(--color-forest);">
+          Account &amp; Preferences
+        </h1>
+        <p style="margin: 4px 0 0; color: var(--color-text-soft); font-size: var(--text-small);">
+          Signed in as <strong>{{ current_user.email }}</strong> ({{ current_user.role | capitalize }})
+        </p>
+      </div>
+      <a class="btn btn--outline" href="{{ home_url }}">
+        &larr; Back to Workspace
+      </a>
+    </div>
 
-  <div class="card" style="max-width: 480px;">
-    <p><strong>Name:</strong> {{ current_user.full_name }}</p>
-    <p><strong>Email:</strong> {{ current_user.email }}</p>
-    <p><strong>Role:</strong> {{ current_user.role }}</p>
-    <p style="margin: 0;"><strong>Dietary preference:</strong> {{ current_user.dietary_preference }}</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-5);">
+      {# Card 1: Profile & Dietary Preference #}
+      <section class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-5);">
+        <h2 style="margin: 0 0 var(--space-3); font-family: var(--font-heading); font-size: var(--text-h3); color: var(--color-forest);">
+          Profile Details
+        </h2>
+        <form method="post" action="{{ url_for('main.account') }}" style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="profile">
+
+          <div>
+            <label for="account-full-name" style="display: block; font-size: var(--text-small); font-weight: 600; margin-bottom: 4px;">
+              Full Name
+            </label>
+            <input id="account-full-name"
+                   name="full_name"
+                   type="text"
+                   maxlength="100"
+                   value="{{ current_user.full_name }}"
+                   required
+                   style="width: 100%; padding: 10px 12px; border-radius: var(--radius-control); border: 1px solid var(--color-border-strong);">
+          </div>
+
+          <div>
+            <label for="account-dietary" style="display: block; font-size: var(--text-small); font-weight: 600; margin-bottom: 4px;">
+              Default Dietary Filter (Student Menu)
+            </label>
+            <select id="account-dietary"
+                    name="dietary_preference"
+                    style="width: 100%; padding: 10px 12px; border-radius: var(--radius-control); border: 1px solid var(--color-border-strong); background: var(--color-surface);">
+              <option value="any" {% if current_user.dietary_preference == 'any' %}selected{% endif %}>Show All Dishes (Any)</option>
+              <option value="veg" {% if current_user.dietary_preference == 'veg' %}selected{% endif %}>Vegetarian Only (Veg)</option>
+              <option value="egg" {% if current_user.dietary_preference == 'egg' %}selected{% endif %}>Contains Egg / Veg</option>
+              <option value="non_veg" {% if current_user.dietary_preference == 'non_veg' %}selected{% endif %}>Non-Vegetarian</option>
+            </select>
+          </div>
+
+          <button class="btn btn--primary" type="submit" style="margin-top: var(--space-2);">
+            Save Profile Changes
+          </button>
+        </form>
+      </section>
+
+      {# Card 2: Change Password #}
+      <section class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-5);">
+        <h2 style="margin: 0 0 var(--space-3); font-family: var(--font-heading); font-size: var(--text-h3); color: var(--color-forest);">
+          Change Password
+        </h2>
+        <form method="post" action="{{ url_for('main.account') }}" style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="password">
+
+          <div>
+            <label for="current-pw" style="display: block; font-size: var(--text-small); font-weight: 600; margin-bottom: 4px;">
+              Current Password
+            </label>
+            <input id="current-pw"
+                   name="current_password"
+                   type="password"
+                   required
+                   style="width: 100%; padding: 10px 12px; border-radius: var(--radius-control); border: 1px solid var(--color-border-strong);">
+          </div>
+
+          <div>
+            <label for="new-pw" style="display: block; font-size: var(--text-small); font-weight: 600; margin-bottom: 4px;">
+              New Password (8+ chars, letter + number)
+            </label>
+            <input id="new-pw"
+                   name="new_password"
+                   type="password"
+                   minlength="8"
+                   required
+                   style="width: 100%; padding: 10px 12px; border-radius: var(--radius-control); border: 1px solid var(--color-border-strong);">
+          </div>
+
+          <div>
+            <label for="confirm-pw" style="display: block; font-size: var(--text-small); font-weight: 600; margin-bottom: 4px;">
+              Confirm New Password
+            </label>
+            <input id="confirm-pw"
+                   name="confirm_password"
+                   type="password"
+                   minlength="8"
+                   required
+                   style="width: 100%; padding: 10px 12px; border-radius: var(--radius-control); border: 1px solid var(--color-border-strong);">
+          </div>
+
+          <button class="btn btn--primary" type="submit" style="margin-top: var(--space-2);">
+            Update Password
+          </button>
+        </form>
+      </section>
+    </div>
   </div>
 {% endblock %}
